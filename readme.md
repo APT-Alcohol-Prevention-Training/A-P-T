@@ -78,6 +78,10 @@ Check `logs/` for error and usage logs.
 Report bugs or submit feedback via the project’s Issue tracker.
 
 ---
+## Contributors: 
+## Grace Kim - [12/13/24]
+## Somy Park - [12/13/24]
+## Sueun Cho - [12/13/24]
 
 ## License
 
