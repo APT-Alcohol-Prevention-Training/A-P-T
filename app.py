@@ -9,84 +9,86 @@ from functools import wraps
 # Load environment variables from .env
 load_dotenv()
 
-# Retrieve API key and default model from environment variables
-DEFAULT_API_KEY = os.getenv('OPENAI_API_KEY')
-DEFAULT_MODEL = os.getenv('OPENAI_DEFAULT_MODEL')
-
-# Retrieve admin credentials from environment variables
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
-
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_default_secret_key')  # Load from .env or use default
 
-# 로그 파일 경로 설정
-LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
-LOG_FILE_PATH = os.path.join(LOG_DIR, 'conversations.log')
+# Logger Class
+class Logger:
+    log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 
-# 로그 디렉토리가 존재하지 않으면 생성
-if not os.path.exists(LOG_DIR):
-    os.makedirs(LOG_DIR)
+    @classmethod
+    def init(cls):
+        log_dir = os.path.dirname(cls.log_file_path)
+        # 로그 디렉토리가 존재하지 않으면 생성
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+    @classmethod
+    def log_conversation(cls, chatbot_type, user_message, bot_response, user_ip):
+        # """
+        # 대화 내용을 로그 파일에 기록합니다.
+        
+        # :param chatbot_type: 챗봇 유형 (A 또는 B)
+        # :param user_message: 사용자가 보낸 메시지
+        # :param bot_response: 챗봇의 응답
+        # :param user_ip: 사용자의 IP 주소
+        # """
+        masked_ip = mask_ip(user_ip)  # IP 주소 마스킹
+        
+        log_entry = f"[{datetime.utcnow().isoformat()}] IP: {masked_ip} | Chatbot: {chatbot_type}\n"
+        log_entry += f"User: {user_message}\nBot: {bot_response}\n\n"
+        
+        try:
+            with open(cls.log_file_path, 'a', encoding='utf-8') as log_file:
+                log_file.write(log_entry)
+        except Exception as e:
+            print(f"Error logging conversation: {e}")
+    @staticmethod
+    def mask_ip(ip_address):
+        # """
+        # IP 주소를 마스킹하여 앞 2자리와 뒤 3자리만 표시합니다.
+        # 예: '192.168.1.10' -> '19*****010'
+        
+        # :param ip_address: 원본 IP 주소 문자열
+        # :return: 마스킹된 IP 주소 문자열
+        # """
+        if not ip_address or len(ip_address) < 5:
+            return 'Unknown'
+        
+        # IP 주소에서 숫자와 점(.)만 추출
+        clean_ip = re.sub(r'[^0-9.]', '', ip_address)
+        
+        # 길이에 따라 마스킹 처리
+        if len(clean_ip) <= 5:
+            return clean_ip  # 너무 짧으면 그대로 반환
+        else:
+            return f"{clean_ip[:2]}{'*' * (len(clean_ip) - 5)}{clean_ip[-3:]}"
+        
+# Authentication Manager Class
+class AuthManager:
+    admin_username = os.getenv('ADMIN_USERNAME')
+    admin_password = os.getenv('ADMIN_PASSWORD')
 
-def mask_ip(ip_address):
-    """
-    IP 주소를 마스킹하여 앞 2자리와 뒤 3자리만 표시합니다.
-    예: '192.168.1.10' -> '19*****010'
-    
-    :param ip_address: 원본 IP 주소 문자열
-    :return: 마스킹된 IP 주소 문자열
-    """
-    if not ip_address or len(ip_address) < 5:
-        return 'Unknown'
-    
-    # IP 주소에서 숫자와 점(.)만 추출
-    clean_ip = re.sub(r'[^0-9.]', '', ip_address)
-    
-    # 길이에 따라 마스킹 처리
-    if len(clean_ip) <= 5:
-        return clean_ip  # 너무 짧으면 그대로 반환
-    else:
-        return f"{clean_ip[:2]}{'*' * (len(clean_ip) - 5)}{clean_ip[-3:]}"
+    @classmethod
+    def check_auth(cls, username, password):
+        # """
+        # 관리자 인증을 확인합니다.
+        
+        # :param username: 입력된 사용자 이름
+        # :param password: 입력된 비밀번호
+        # :return: 인증 성공 여부
+        # """
+        return username == cls.admin_username and password == cls.admin_password
+    @staticmethod
+    def authenticate():
+        """
+        인증 실패 시 401 응답을 반환합니다.
+        """
+        return Response(
+            'Could not verify your access level for that URL.\n'
+            'You have to login with proper credentials.', 401,
+            {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
-def log_conversation(chatbot_type, user_message, bot_response, user_ip):
-    """
-    대화 내용을 로그 파일에 기록합니다.
-    
-    :param chatbot_type: 챗봇 유형 (A 또는 B)
-    :param user_message: 사용자가 보낸 메시지
-    :param bot_response: 챗봇의 응답
-    :param user_ip: 사용자의 IP 주소
-    """
-    masked_ip = mask_ip(user_ip)  # IP 주소 마스킹
-    
-    log_entry = f"[{datetime.utcnow().isoformat()}] IP: {masked_ip} | Chatbot: {chatbot_type}\n"
-    log_entry += f"User: {user_message}\nBot: {bot_response}\n\n"
-    
-    try:
-        with open(LOG_FILE_PATH, 'a', encoding='utf-8') as log_file:
-            log_file.write(log_entry)
-    except Exception as e:
-        print(f"Error logging conversation: {e}")
-
-def check_auth(username, password):
-    """
-    관리자 인증을 확인합니다.
-    
-    :param username: 입력된 사용자 이름
-    :param password: 입력된 비밀번호
-    :return: 인증 성공 여부
-    """
-    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
-
-def authenticate():
-    """
-    인증 실패 시 401 응답을 반환합니다.
-    """
-    return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials.', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
+# Decorator for Authentication
 def requires_auth(f):
     """
     기본 인증을 요구하는 데코레이터입니다.
@@ -97,19 +99,56 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
+        if not auth or not AuthManager.check_auth(auth.username, auth.password):
+            return AuthManager.authenticate()
         return f(*args, **kwargs)
     return decorated
 
+# Chatbot Class
+class Chatbot:
+    default_model = os.getenv('OPENAI_DEFAULT_MODEL')
+
+    # Function to get chatbot response
+    @classmethod
+    def get_response(cls, chatbot_type, user_message, api_key):
+        # Use session-specific model or default
+        fine_tuned_model = session.get('fine_tuned_model', cls.default_model)
+
+        if not api_key or not fine_tuned_model:
+            return "Please configure API key and model ID first."
+
+        # Initialize OpenAI client
+        client = OpenAI(api_key=api_key)
+
+        if chatbot_type == 'A':
+            style_instruction = "Respond in an informal, friendly, and casual manner."
+        else:
+            style_instruction = "Respond in a formal and official manner."
+
+        messages = [
+            {"role": "system", "content": f"{style_instruction}"},
+            {"role": "user", "content": user_message}
+        ]
+
+        try:
+            response = client.chat.completions.create(
+                model=fine_tuned_model,  # Use the fine-tuned model from session or class default
+                messages=messages,
+                temperature=0.7
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"Error in OpenAI API call: {e}")
+            return "I'm sorry, I encountered an error. Please try again later."
+        
 # Home route
 # Home route handling both home page and chat functionalities
 @app.route("/", methods=["GET", "POST"])
 def home():
     if "openai_api_key" not in session:
-        session["openai_api_key"] = DEFAULT_API_KEY
+        session["openai_api_key"] = os.getenv('OPENAI_API_KEY')
     if "fine_tuned_model" not in session:
-        session["fine_tuned_model"] = DEFAULT_MODEL
+        session["fine_tuned_model"] = Chatbot.default_model
 
     if request.method == "POST":
         data = request.get_json()
@@ -119,11 +158,12 @@ def home():
         if chatbot_type not in ["A", "B"]:
             return jsonify({"error": "Invalid chatbot type."}), 400
 
-        bot_response = get_chatbot_response(chatbot_type, user_message)
+        api_key = session.get("openai_api_key")
+        bot_response = Chatbot.get_response(chatbot_type, user_message, api_key)
         
         # IP 주소 기록을 위해 가져오기
         user_ip = request.remote_addr or "Unknown"
-        log_conversation(chatbot_type, user_message, bot_response, user_ip)
+        Logger.log_conversation(chatbot_type, user_message, bot_response, user_ip)
 
         return jsonify({"bot_response": bot_response})
 
@@ -139,44 +179,9 @@ def download_logs():
     """
     try:
         # send_from_directory는 positional arguments로 directory와 path를 받습니다.
-        return send_from_directory(LOG_DIR, 'conversations.log', as_attachment=True)
+        return send_from_directory(os.path.dirname(Logger.log_file_path), 'conversations.log', as_attachment=True)
     except FileNotFoundError:
         abort(404, description="Log file not found.")
-
-# Function to get chatbot response
-def get_chatbot_response(chatbot_type, user_message):
-    # Ensure the API key and model ID are available in the session
-    api_key = session.get('openai_api_key')
-    fine_tuned_model = session.get('fine_tuned_model')
-
-    if not api_key or not fine_tuned_model:
-        return "Please configure API key and model ID first."
-
-    # Initialize OpenAI client
-    client = OpenAI(api_key=api_key)
-
-    if chatbot_type == 'A':
-        style_instruction = "Respond in an informal, friendly, and casual manner."
-    else:
-        style_instruction = "Respond in a formal and official manner."
-
-    messages = [
-        {"role": "system", "content": f"{style_instruction}"},
-        {"role": "user", "content": user_message}
-    ]
-
-    try:
-        response = client.chat.completions.create(
-            model=fine_tuned_model,
-            messages=messages,
-            temperature=0.7
-        )
-        bot_reply = response.choices[0].message.content.strip()
-    except Exception as e:
-        print(f"Error in OpenAI API call: {e}")
-        bot_reply = "I'm sorry, I encountered an error. Please try again later."
-
-    return bot_reply
 
 # Run the app
 if __name__ == '__main__':
