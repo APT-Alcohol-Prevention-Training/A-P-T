@@ -1,3 +1,6 @@
+import os
+from flask import session
+from openai import OpenAI
 class Chatbot:
     default_model = os.getenv('OPENAI_DEFAULT_MODEL')
 

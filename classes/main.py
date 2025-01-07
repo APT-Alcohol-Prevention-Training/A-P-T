@@ -1,5 +1,9 @@
+# main.py
 from app import app
 
-# Run the app
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=False)
+    # Optional: Initialize log directory
+    # from logger import Logger
+    # Logger.init()
+
+    app.run(host='0.0.0.0', port=5000, debug=False)
