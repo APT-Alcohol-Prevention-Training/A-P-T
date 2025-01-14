@@ -8,7 +8,7 @@ import re
 # 1. Import from your local files
 from authmanager import AuthManager, requires_auth
 from chatbot import Chatbot
-from logger import Logger
+from custom_logger import Logger
 
 load_dotenv()
 
@@ -17,11 +17,10 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_default_secret_key')
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    if "openai_api_key" not in session:
-        session["openai_api_key"] = os.getenv('OPENAI_API_KEY')
+    session["openai_api_key"] = os.getenv('OPENAI_API_KEY')
+    session["fine_tuned_model"] = Chatbot.default_model
     if "fine_tuned_model" not in session:
         session["fine_tuned_model"] = Chatbot.default_model
-
     if request.method == "POST":
         data = request.get_json()
         user_message = data.get("message")
@@ -31,6 +30,7 @@ def home():
             return jsonify({"error": "Invalid chatbot type."}), 400
 
         api_key = session.get("openai_api_key")
+        print(api_key)
         bot_response = Chatbot.get_response(chatbot_type, user_message, api_key)
         
         user_ip = request.remote_addr or "Unknown"
