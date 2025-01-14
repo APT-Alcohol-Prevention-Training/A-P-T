@@ -1,2 +1,4 @@
 fine-tuning.txt
 .env
+
+__pycache__/

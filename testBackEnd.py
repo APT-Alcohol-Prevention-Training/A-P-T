@@ -1,6 +1,6 @@
 # Logger test
 import os
-from logger import Logger
+from classes.custom_logger import Logger
 
 def test_logger():
     # Initialize the logger (creates the logs directory if it doesn't exist)
