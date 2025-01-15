@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.custom-shadow
+{
+  box-shadow: 1px 2px 14px 0px #1088FF29;
+}
+.inner-shadow
+{
+  box-shadow: 0px 4px 68px 8px #FFF5DA3D inset;
+
+box-shadow: 0px 2px 24px 0px #24A3DD14;
+
+}
+
+.drop-shadow
+{
+  box-shadow: 0px 4px 68px 8px #FFF5DA3D inset;
+
+  box-shadow: 0px 2px 24px 12px #E3E3E3;
+  
+}
+
+.select-shadow
+{
+  border: 8px solid #1F82C4; /* Single color close to the gradient */
+  border-radius: 16px; 
+
+  box-shadow: 0px 6px 24px 0px #1088FF80;
+}
+.select-shadow::before
+{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit; /* Match the border radius */
+  padding: 8px; /* Border thickness */
+  background: linear-gradient(92.64deg, #28AAE1 -0.72%, #0364B3 50.96%, #012B4D 100.58%);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1; /* Place it behind the content */
+}
+.select-shadow .content {
+  position: relative;
+  border-radius: 16px; /* Match the border radius */
+  background: white; /* Inner background color */
+  padding: 16px; /* Padding for the inner content */
+
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color:  #EEF2FD;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f4f4f4;
+  border-radius: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
+  border: 3px solid #f4f4f4;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -326,3 +326,21 @@ Bot: response.choices[0].message.content.strip()
 User: hello
 Bot: Hey there! How's your day going so far?
 
+[2025-01-15T09:43:15.327869] IP: 12****0.1 | Chatbot: B
+User: ehefefef
+Bot: Dear User,
+
+I'm sorry, but I was unable to understand your message. Could you please provide me with more details or clarify your request? I am here to assist you to the best of my ability.
+
+Sincerely,
+AI Assistant
+
+[2025-01-15T09:43:27.519944] IP: 12****0.1 | Chatbot: B
+User: my name is Sueun Cho
+Bot: Dear Ms. Sueun Cho,
+
+Thank you for your introduction. How may I assist you today?
+
+Sincerely,
+AI Assistant
+
