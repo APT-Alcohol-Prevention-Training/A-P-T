@@ -26,6 +26,9 @@ const roles = [
 ];
 
 export default function ChooseAvatar() {
+  // State Hook(useState) 예시
+  // const [state, setState] = useState (초기값)
+  // state 는 현재 상태값, setState는 상태값을 변경하는 함수
   const [selected, setSelected] = useState("");
   const [userMessage, setUserMessage] = useState("");
   const [botResponse, setBotResponse] = useState("");
@@ -40,11 +43,15 @@ export default function ChooseAvatar() {
     // 여기서는 예시로 'A'
     const chatbotType = "A";
     try {
+      // fetch -> 네트워크 요청 수행
+      // /api/chat 으로 요청을 보내면, 해당 라우트에서 요청을 받아 처리하고 응답을 돌려줌
+      // POST는 일반적으로 데이터를 서버에 전송
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        // 실제 전송할 데이터(페이로드)를 body에 담는다.
         body: JSON.stringify({ message: userMessage, chatbot_type: chatbotType }),
       });
       const data = await res.json();
@@ -73,9 +80,8 @@ export default function ChooseAvatar() {
             <div key={role.id} className="flex flex-col items-center">
               <div
                 onClick={() => handleSelection(role.id)}
-                className={`bg-[#FAFCFC] flex-grow h-full ${
-                  selected === role.id ? "select-shadow" : "inner-shadow"
-                } px-14 py-10 rounded-2xl flex justify-center items-center cursor-pointer transition-shadow duration-300`}
+                className={`bg-[#FAFCFC] flex-grow h-full ${selected === role.id ? "select-shadow" : "inner-shadow"
+                  } px-14 py-10 rounded-2xl flex justify-center items-center cursor-pointer transition-shadow duration-300`}
               >
                 <Image
                   src={role.image}
@@ -118,11 +124,10 @@ export default function ChooseAvatar() {
         <div className="flex flex-col justify-center items-center">
           <Link href={selected ? `/${selected}` : "#"}>
             <p
-              className={`mt-12 flex items-center mb-8 text-2xl leading-7 font-bold text-white px-10 py-4 gap-2 rounded-full ${
-                selected
+              className={`mt-12 flex items-center mb-8 text-2xl leading-7 font-bold text-white px-10 py-4 gap-2 rounded-full ${selected
                   ? "bg-gradient-to-r from-[#28AAE1] via-[#0364B3] to-[#012B4D] hover:opacity-90"
                   : "bg-[#C9C7C7] cursor-not-allowed"
-              }`}
+                }`}
               onClick={(e) => {
                 if (!selected) {
                   e.preventDefault();
