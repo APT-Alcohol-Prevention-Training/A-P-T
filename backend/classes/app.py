@@ -50,7 +50,7 @@ def home():
         return jsonify({"bot_response": bot_response})
 
     # GET 요청일 때
-    return jsonify({"message": "Hello from Flask backend!"})
+    return jsonify({"message": "!!!!!Hello from Flask backend!!!!!"})
 
 @app.route('/download_logs')
 @requires_auth
