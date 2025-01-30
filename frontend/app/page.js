@@ -1,149 +1,43 @@
 "use client";
-import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-// roles 배열
-const roles = [
-  {
-    id: "ai-chatbot",
-    name: "AI Chatbot",
-    image: "/ai-chatbot.svg",
-    alt: "AI Chatbot",
-  },
-  {
-    id: "medical-professional",
-    name: "Medical Professional",
-    image: "/medical-professional.svg",
-    alt: "Medical Professional",
-  },
-  {
-    id: "student",
-    name: "Student",
-    image: "/student.svg",
-    alt: "Student",
-  },
-];
+export default function Home() {
+  const [clicked, setClicked] = useState(false);
+  const router = useRouter();
 
-export default function ChooseAvatar() {
-  // State Hook(useState) 예시
-  // const [state, setState] = useState (초기값)
-  // state 는 현재 상태값, setState는 상태값을 변경하는 함수
-  const [selected, setSelected] = useState("");
-  const [userMessage, setUserMessage] = useState("");
-  const [botResponse, setBotResponse] = useState("");
+  // Array of routes
+  const routes = ["/medical-professional", "/ai-chatbot", "/student"];
 
-  const handleSelection = (roleId) => {
-    setSelected(roleId);
-  };
-
-  const sendMessageToFlask = async () => {
-    if (!userMessage) return;
-    // chatbot_type = 'A' (informal), 'B' (formal) 등 구분
-    // 여기서는 예시로 'A'
-    const chatbotType = "A";
-    try {
-      // fetch -> 네트워크 요청 수행
-      // /api/chat 으로 요청을 보내면, 해당 라우트에서 요청을 받아 처리하고 응답을 돌려줌
-      // POST는 일반적으로 데이터를 서버에 전송
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // 실제 전송할 데이터(페이로드)를 body에 담는다.
-        body: JSON.stringify({ message: userMessage, chatbot_type: chatbotType }),
-      });
-      const data = await res.json();
-      if (data.bot_response) {
-        setBotResponse(data.bot_response);
-      } else if (data.error) {
-        setBotResponse(`Error: ${data.error}`);
-      } else {
-        setBotResponse("Something went wrong.");
-      }
-    } catch (err) {
-      console.error(err);
-      setBotResponse("Request failed.");
-    }
+  // Function to handle button click
+  const handleClick = () => {
+    const randomRoute = routes[Math.floor(Math.random() * routes.length)];
+    router.push(randomRoute); // Redirect to the random route
   };
 
   return (
-    <div className="bg-[#F6F6F2] min-h-screen flex items-center">
-      <div className="max-w-[100%] lg:max-w-[80%] mx-auto mt-18">
-        <h2 className="text-4xl text-center leading-tight font-semibold">
-          Choose your assistant
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 mt-24 gap-6">
-          {roles.map((role) => (
-            <div key={role.id} className="flex flex-col items-center">
-              <div
-                onClick={() => handleSelection(role.id)}
-                className={`bg-[#FAFCFC] flex-grow h-full ${selected === role.id ? "select-shadow" : "inner-shadow"
-                  } px-14 py-10 rounded-2xl flex justify-center items-center cursor-pointer transition-shadow duration-300`}
-              >
-                <Image
-                  src={role.image}
-                  width={204}
-                  height={484}
-                  alt={role.alt}
-                  className="h-full"
-                />
-              </div>
-              <h3 className="text-center mt-6 font-bold text-xl leading-6">
-                {role.name}
-              </h3>
-            </div>
-          ))}
+    <div className=" px-[32px] md:px-[64px] flex flex-col  pt-[40px] min-h-screen bg-[#F6F6F2]">
+      {clicked && <Image src="/logo2.svg" width={40} height={40} alt="logo" />}
+      <div className="flex flex-col justify-between flex-grow items-center mt-[100px]">
+        <p className="text-[32px] leading-[38px] font-semibold text-[#000000] ">
+          Welcome to the
+        </p>
+        <div>
+          <Image src="/logo3.svg" width={365} height={80} alt="logo" />
         </div>
+        <button
+          onClick={() => {
+            setClicked(!clicked);
+            handleClick(); // Call the redirection function
+          }}
+          className="bg-gradient-to-r flex items-center text-[16px] sm:text-[24px] leading-[29px] font-bold text-white px-[20px] sm:px-[40px] py-[16.5px]  gap-2 rounded-[99px] from-[#28AAE1] via-[#0364B3] to-[#012B4D]"
+        >
+          Let’s Get Started
+          <Image src="/arrow-right.svg" width={28} height={28} alt="arrow" />
+        </button>
 
-        {/* 사용자 메시지 입력란 */}
-        <div className="mt-8 flex flex-col items-center">
-          <input
-            className="border p-2 rounded w-64"
-            placeholder="Type your message..."
-            value={userMessage}
-            onChange={(e) => setUserMessage(e.target.value)}
-          />
-          <button
-            className="bg-blue-600 text-white mt-4 px-4 py-2 rounded"
-            onClick={sendMessageToFlask}
-          >
-            Send to Flask
-          </button>
-        </div>
-
-        {/* Flask로부터 받은 봇 응답 */}
-        {botResponse && (
-          <div className="mt-4">
-            <p>Bot says: {botResponse}</p>
-          </div>
-        )}
-
-        <div className="flex flex-col justify-center items-center">
-          <Link href={selected ? `/${selected}` : "#"}>
-            <p
-              className={`mt-12 flex items-center mb-8 text-2xl leading-7 font-bold text-white px-10 py-4 gap-2 rounded-full ${selected
-                  ? "bg-gradient-to-r from-[#28AAE1] via-[#0364B3] to-[#012B4D] hover:opacity-90"
-                  : "bg-[#C9C7C7] cursor-not-allowed"
-                }`}
-              onClick={(e) => {
-                if (!selected) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              Carry On
-              <Image
-                src="/arrow-right.svg"
-                width={28}
-                height={28}
-                alt="Arrow Right"
-              />
-            </p>
-          </Link>
-        </div>
+        <Image src="/hands.svg" width={471} height={471} alt="logo" />
       </div>
     </div>
   );

@@ -122,10 +122,6 @@ export default function ChatBox() {
               alt="doctor"
             />
           </div>
-
-          <div className="bg-[#F6F6F2] custom-shadow mt-[14px] font-semibold text-[16px] leading-[19px] px-[24px] rounded-[16px] flex justify-center items-center py-[14px] text-center text-[#232C3C]">
-            Just know that I’m here for you. Always.
-          </div>
         </div>
       </div>
 

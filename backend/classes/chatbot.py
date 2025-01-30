@@ -8,7 +8,10 @@ class Chatbot:
     @classmethod
     def get_response(cls, chatbot_type, user_message, api_key):
         # Use session-specific model or default
-        fine_tuned_model = session.get('fine_tuned_model', cls.default_model)
+        api_key = os.getenv('OPENAI_API_KEY')  # 환경 변수 직접 사용
+        fine_tuned_model = os.getenv('OPENAI_DEFAULT_MODEL')  # 환경 변수 직접 사용
+        
+        # fine_tuned_model = session.get('fine_tuned_model', cls.default_model)
 
         if not api_key or not fine_tuned_model:
             return "Please configure API key and model ID first."
