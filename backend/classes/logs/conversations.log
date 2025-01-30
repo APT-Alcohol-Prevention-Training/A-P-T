@@ -2,3 +2,15 @@
 User: hello
 Bot: Hey there! How's it going?
 
+[2025-01-30T02:02:00.702255] IP: 12****0.1 | Chatbot: A
+User: hello wrold
+Bot: Hey there! How's everything going?
+
+[2025-01-30T02:02:10.219543] IP: 12****0.1 | Chatbot: A
+User: how are you?
+Bot: Hey there! I'm an AI, so I don't have feelings, but I'm here and ready to help you. What can I assist you with today?
+
+[2025-01-30T02:02:17.722589] IP: 12****0.1 | Chatbot: A
+User: who are you?
+Bot: Hey there! I'm an AI developed by OpenAI, here to help you with any queries or tasks you have. What can I assist you with today?
+
