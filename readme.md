@@ -53,66 +53,73 @@ Date: *December 14, 2024 – January 29, 2025*
 
 ---
 
-## **Installation & Setup**
 
-### **1. Clone the Repository**
-```bash
-git clone https://github.com/your-username/Research-Chat-Bot.git
-cd Research-Chat-Bot
-```
+## Installation & Setup
 
-### **2. Backend Setup (Flask)**
+### Backend (Flask + Poetry)
 
-1. **Create and activate a virtual environment (venv):**
+1. **Clone the Repository**
+
    ```bash
-   cd backend
-   python3 -m venv venv
-   source venv/bin/activate
+   git clone https://github.com/your-username/Research-Chat-Bot.git
+   cd Research-Chat-Bot/backend
    ```
-2. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Configure environment variables** (see [Environment Variables](#environment-variables)).
-4. **Run the Flask development server** (not for production):
-   ```bash
-   python main.py
-   ```
-   - Default: `http://127.0.0.1:8000`
 
-### **3. Frontend Setup (Next.js)**
+2. **Install Poetry** (if not already installed)
 
-1. **Install dependencies:**
+   Follow the [Poetry installation guide](https://python-poetry.org/docs/#installation).
+
+3. **Install Dependencies**
+
+   Use Poetry to install all dependencies defined in `pyproject.toml`:
+
+   ```bash
+   poetry install
+   ```
+
+4. **Configure Environment Variables**
+
+   Create a `.env` file in the `backend/` folder (see [Environment Variables](#environment-variables)).
+
+5. **Run the Flask Development Server**
+
+   For development use:
+
+   ```bash
+   poetry run python main.py
+   ```
+
+   - Default URL: `http://127.0.0.1:8000`
+
+### Frontend (Next.js)
+
+1. **Navigate to the Frontend Folder**
+
    ```bash
    cd ../frontend
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
    npm install
    ```
-2. **Run the Next.js development server**:
+
+3. **Run the Next.js Development Server**
+
    ```bash
    npm run dev
    ```
-   - Default: `http://localhost:3000`
 
-### **4. Production Deployment**
-
-1. **Use Gunicorn** (or another WSGI server) for Flask:
-   ```bash
-   gunicorn -w 4 -b 0.0.0.0:8080 app:app
-   ```
-2. **Build Next.js** for production:
-   ```bash
-   npm run build
-   npm start
-   ```
-3. **Configure GCP firewall** to allow incoming traffic on the ports used (e.g., 3000, 8080).
+   - Default URL: `http://localhost:3000`
 
 ---
 
-## **Environment Variables**
+## Environment Variables
 
-Create a `.env` file in the `backend/` folder to store secrets and configuration details:
+In the `backend/` folder, create a `.env` file to store secrets and configuration details:
 
-```bash
+```ini
 API_KEY=your-secret-api-key
 OPENAI_API_KEY=your-openai-key
 DATABASE_URL=mysql://user:password@host:port/dbname
@@ -120,71 +127,152 @@ SECRET_KEY=supersecret
 FLASK_ENV=production
 ```
 
-**Note**: Update `app.py` or other scripts to read these variables using `os.getenv("API_KEY")` (and consider using `python-dotenv`).
+Your Flask application and related scripts will read these variables using `os.getenv("VARIABLE_NAME")` (with support from [python-dotenv](https://github.com/theskumar/python-dotenv)).
 
 ---
 
-## **Commands & Scripts**
+## Commands & Scripts
 
-| Command / Script        | Usage                          | Description                                                           |
-|-------------------------|--------------------------------|-----------------------------------------------------------------------|
-| **Run Application**     | `python app.py`                | Starts the Flask development server                                   |
-| **Fine-Tuning**         | `python fineTring.py`          | Fine-tunes a model using `training_data.jsonl`                        |
-| **Test Fine-Tuning**    | `python testfineTring.py`      | Tests or validates the fine-tuned model                               |
-| **API Model Script**    | `python apimodel.py`           | Runs additional API-related logic (if applicable)                     |
-| **Update Requirements** | `pip freeze > requirements.txt` | Updates `requirements.txt` based on current environment               |
-| **Next.js Dev**         | `npm run dev`                   | Runs Next.js in development mode (localhost:3000 by default)          |
-| **Next.js Build**       | `npm run build`                 | Builds Next.js for production                                        |
-| **Next.js Start**       | `npm start`                     | Starts Next.js in production mode on the configured port (3000 by default) |
-
----
-
-## **Frontend & Backend Cycle**
-
-Below is a simple illustration of how data flows between the **Next.js** frontend and the **Flask** backend:
-
-1. **Frontend** (Next.js) - user inputs text in the chat interface.  
-2. That input is sent to the **Backend** (Flask) at `http://<SERVER_IP>:8000` or your chosen port.  
-3. **`main.py`** receives the request, processes it (possibly calling GPT or a fine-tuned model).  
-4. The **AI Model** returns a response to **`main.py`**, which in turn sends it back to the **Frontend**.  
-5. **Frontend** displays the response to the user.
-
-**One full cycle**:  
-Frontend → Flask → GPT-based model → Flask → Frontend.
+| **Command / Script**          | **Usage**                                           | **Description**                                                          |
+|-------------------------------|-----------------------------------------------------|--------------------------------------------------------------------------|
+| **Run Application**           | `poetry run python main.py`                         | Starts the Flask development server                                      |
+| **Fine-Tuning**               | `poetry run python fineTring.py`                    | Fine-tunes a model using `training_data.jsonl`                           |
+| **Test Fine-Tuning**          | `poetry run python testfineTring.py`                | Tests or validates the fine-tuned model                                  |
+| **API Model Script**          | `poetry run python apimodel.py`                     | Runs additional API-related logic (if applicable)                        |
+| **Update Poetry Dependencies**| `poetry update`                                     | Updates dependencies as per `pyproject.toml`                             |
+| **Next.js Development**       | `npm run dev`                                       | Runs Next.js in development mode (localhost:3000 by default)             |
+| **Next.js Build**             | `npm run build`                                     | Builds Next.js for production                                            |
+| **Next.js Start**             | `npm start`                                         | Starts Next.js in production mode (default port: 3000)                   |
 
 ---
 
-## **Additional Notes**
+## Frontend & Backend Cycle
 
-- **Production Deployment**  
-  - Set `FLASK_ENV=production` in `.env`.  
-  - Use a production server like Gunicorn or uWSGI for Flask.
-- **HTTPS**  
-  - Configure SSL certificates (e.g., via a load balancer or reverse proxy) for secure connections.
-- **Database Integration**  
-  - (Optional) If you need persistent data storage, integrate an ORM or direct DB calls.
-- **Logging**  
-  - Check logs in `logs/` folder for errors or usage stats.
+Data flows through the system as follows:
+
+1. **User Input:** The user types a message in the Next.js chat interface.  
+2. **Backend Request:** The frontend sends the input to the Flask backend (e.g., `http://<SERVER_IP>:8000`).  
+3. **Processing:** The Flask app (via `main.py`) processes the request—calling the GPT-based model (or a fine-tuned variant) to generate a response.  
+4. **Response:** The AI model returns a response to Flask, which then sends it back to the frontend.  
+5. **Display:** The frontend displays the chatbot’s response to the user.
 
 ---
 
-## **Contributors**
+## Additional Notes
+
+- **Production Deployment:**  
+  - Set `FLASK_ENV=production` in your `.env` file.
+  - Use a production server like Gunicorn:  
+    ```bash
+    gunicorn -w 4 -b 0.0.0.0:8080 main:app
+    ```
+- **HTTPS:**  
+  Configure SSL certificates (using a load balancer or reverse proxy) for secure connections.
+- **Database Integration:**  
+  Integrate an ORM or direct database calls if persistent storage is required.
+- **Logging:**  
+  Check the `logs/` folder for error logs and usage statistics.
+- **File Reorganization:**  
+  The project is now organized into modular components for improved maintainability and scalability.
+
+---
+
+## Contributors
 
 - **Somy Park (박소미)** – [LinkedIn](https://www.linkedin.com/in/somy-park-4a45b2226/)  
-  - **Role**: Backend organization & classification, AI model tuning
-- **Sueun Cho (조수은)**  - [LinkedIn](https://www.linkedin.com/in/sueun-cho-625262252/)
-  - **Role**: DevOps & AI model tuning
-- **Grace Jeonghyun Kim (김정현) Ph.D** – [UMD Directory](https://communication.umd.edu/directory/grace-jeonghyun-kim)
-  - **Role**: Project manager
+  *Role:* Backend organization & classification, AI model tuning
+- **Sueun Cho (조수은)** – [LinkedIn](https://www.linkedin.com/in/sueun-cho-625262252/)  
+  *Role:* DevOps & AI model tuning
+- **Grace Jeonghyun Kim (김정현) Ph.D** – [UMD Directory](https://communication.umd.edu/directory/grace-jeonghyun-kim)  
+  *Role:* Project Manager
 
 ---
 
-## **License**
+## License
 
-This project is distributed under the [MIT License](LICENSE). You are free to modify and distribute this software as per the terms detailed in the `LICENSE` file.
+This project is distributed under the [MIT License](LICENSE). Feel free to modify and distribute the software as per the terms detailed in the `LICENSE` file.
 
 ---
 
-### **End of README**  
 > **Enjoy building and customizing your Research Chat Bot!**  
-> For questions or issues, please contact the contributors or open an issue on the repository.
+> For questions or issues, please contact the contributors or open an issue in the repository.
+```
+
+---
+
+This revised README now clearly documents your project’s structure, setup (with Poetry for the backend), and overall workflow while ensuring that all instructions are detailed and concise.
+
+
+---
+
+## Quality Checks & Commands
+
+To ensure the codebase adheres to formatting standards, passes linting, type checks, and other quality gates, use the following commands with Poetry.
+
+### Automatic Formatting & Import Sorting
+
+| **Command**                  | **Description**                                                                                 | **Usage**           |
+|------------------------------|-------------------------------------------------------------------------------------------------|---------------------|
+| **Format with Black**        | Automatically reformat your code to conform to [Black](https://black.readthedocs.io/).           | `poetry run black .` |
+| **Sort Imports with isort**  | Automatically sort and format your imports using [isort](https://pycqa.github.io/isort/).         | `poetry run isort .` |
+
+> **Note:** Running `poetry run black --check .` or `poetry run isort --check-only .` will only check for formatting issues without applying fixes. If files need reformatting, run the commands without the `--check` or `--check-only` flags.
+
+### Testing
+
+| **Command**             | **Description**                                                             | **Usage**             |
+|-------------------------|-----------------------------------------------------------------------------|-----------------------|
+| **Run Tests**           | Executes all unit tests using [pytest](https://docs.pytest.org/).            | `poetry run pytest`   |
+
+> **Note:** If "no tests ran" appears, ensure your test files are named according to the pytest conventions (e.g., `test_*.py`).
+
+### Linting & Type Checking
+
+| **Command**                      | **Description**                                                                              | **Usage**              |
+|----------------------------------|----------------------------------------------------------------------------------------------|------------------------|
+| **Lint with Flake8**             | Checks code for linting errors using [Flake8](https://flake8.pycqa.org/en/latest/).           | `poetry run flake8`    |
+| **Type Checking with mypy**      | Performs static type checking using [mypy](http://mypy-lang.org/).                           | `poetry run mypy .`    |
+
+### Security Scanning
+
+| **Command**                      | **Description**                                                                                          | **Usage**                  |
+|----------------------------------|----------------------------------------------------------------------------------------------------------|----------------------------|
+| **Security Scan with Bandit**    | Scans your project for common security issues using [Bandit](https://bandit.readthedocs.io/).             | `poetry run bandit -r .`    |
+
+### Example Workflow
+
+1. **Reformat Code & Sort Imports:**
+
+   Run:
+   
+   ```
+   poetry run black .
+   poetry run isort .
+   ```
+
+2. **Run Linting & Type Checks:**
+
+   Run:
+   
+   ```
+   poetry run flake8
+   poetry run mypy .
+   ```
+
+3. **Run Security Scan:**
+
+   Run:
+   
+   ```
+   poetry run bandit -r .
+   ```
+
+4. **Execute Tests:**
+
+   Run:
+   
+   ```
+   poetry run pytest
+   ```
+
+Following these commands ensures that your code remains consistently formatted, free of linting issues, type-safe, and secure.
