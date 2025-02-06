@@ -1,5 +1,4 @@
 import os
-
 from flask import Blueprint, abort, jsonify, request, send_from_directory, session
 
 # Local imports for authentication, chatbot, and logging
@@ -17,12 +16,12 @@ def home():
     """
     Home endpoint:
       - GET returns a welcome message.
-      - POST expects JSON with 'message' and 'chatbot_type', processes it,
-        logs the conversation, and returns the chatbot response.
+      - POST expects JSON with 'message', 'chatbot_type', and (optionally) 'risk_score'.
+        It processes the message, logs the conversation, and returns the chatbot response.
     """
     # Set session variables for API key and default model
     session["openai_api_key"] = os.getenv("OPENAI_API_KEY")
-    session["fine_tuned_model"] = Chatbot.default_model
+    session["fine_tuned_model"] = os.getenv("OPENAI_DEFAULT_MODEL")
 
     if request.method == "POST":
         data = request.get_json()
@@ -31,7 +30,6 @@ def home():
                 "Invalid or missing JSON payload.", status_code=400
             )
 
-        # Validate presence of required parameters
         user_message = data.get("message")
         if user_message is None:
             raise MissingParameterError("Missing 'message' parameter.", status_code=400)
@@ -42,15 +40,21 @@ def home():
                 "Missing 'chatbot_type' parameter.", status_code=400
             )
 
-        # Validate chatbot type
-        if chatbot_type not in ["A", "B"]:
+        # Allowed types: "ai", "student", "doctor"
+        ALLOWED_CHATBOT_TYPES = ["ai", "student", "doctor"]
+        if chatbot_type not in ALLOWED_CHATBOT_TYPES:
             raise InvalidChatbotTypeError(
                 "Invalid chatbot type provided.", status_code=400
             )
 
-        # Retrieve API key from session and get chatbot response
+        # Optionally retrieve risk_score (used in the pre-chat assessment)
+        risk_score = data.get("risk_score")
+
+        # Retrieve API key from session and get chatbot response (passing risk_score if available)
         api_key = session.get("openai_api_key")
-        bot_response = Chatbot.get_response(chatbot_type, user_message, api_key)
+        bot_response = Chatbot.get_response(
+            chatbot_type, user_message, risk_score, api_key
+        )
 
         # Log the conversation using the custom logger
         user_ip = request.remote_addr or "Unknown"
@@ -59,7 +63,7 @@ def home():
         return jsonify({"bot_response": bot_response})
 
     # GET request response
-    return jsonify({"message": "!!!!!Hello from Flask backend!!!!!"})
+    return jsonify({"message": "Hello world! from Flask backend"})
 
 
 @main_bp.route("/download_logs")
@@ -75,5 +79,4 @@ def download_logs():
     except FileNotFoundError:
         abort(404, description="Log file not found.")
     except Exception as e:
-        # Catch any unexpected errors
         abort(500, description=str(e))

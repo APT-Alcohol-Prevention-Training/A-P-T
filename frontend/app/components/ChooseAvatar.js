@@ -4,22 +4,22 @@ import Link from "next/link";
 
 const roles = [
   {
-    id: "ai-chatbot",
-    name: "AI Chatbot",
-    image: "/ai-chatbot.svg",
-    alt: "AI Chatbot",
+    id: "ai",
+    name: "ai",
+    image: "/ai.svg",
+    alt: "ai",
   },
   {
-    id: "medical-professional",
-    name: "Medical Professional",
-    image: "/medical-professional.svg",
-    alt: "Medical Professional",
+    id: "doctor",
+    name: "doctor",
+    image: "/doctor.svg",
+    alt: "doctor",
   },
   {
     id: "student",
-    name: "Student",
+    name: "student",
     image: "/student.svg",
-    alt: "Student",
+    alt: "student",
   },
 ];
 
@@ -69,20 +69,10 @@ const ChooseAvatar = () => {
                   ? "bg-gradient-to-r from-[#28AAE1] via-[#0364B3] to-[#012B4D] hover:opacity-90"
                   : "bg-[#C9C7C7] cursor-not-allowed"
               }`}
-              // Disable click if not selected
-              onClick={(e) => {
-                if (!selected) {
-                  e.preventDefault();
-                }
-              }}
+              onClick={(e) => { if (!selected) e.preventDefault(); }}
             >
               Carry On
-              <Image
-                src="/arrow-right.svg"
-                width={28}
-                height={28}
-                alt="Arrow Right"
-              />
+              <Image src="/arrow-right.svg" width={28} height={28} alt="Arrow Right" />
             </p>
           </Link>
         </div>
