@@ -1,7 +1,8 @@
 import openai
 from dotenv import load_dotenv
-load_dotenv()
 import os
+
+load_dotenv()
 
 # API 키 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -10,5 +11,5 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 models = openai.models.list()
 
 # 모델 목록 출력
-for model in models['data']:  # 모델 데이터를 반복
-    print(model['id'])
+for model in models.data:  # 수정: 'data' 속성 사용
+    print(model.id)  # 수정: 객체 속성으로 접근
