@@ -277,22 +277,3 @@ To ensure the codebase adheres to formatting standards, passes linting, type che
 
 Following these commands ensures that your code remains consistently formatted, free of linting issues, type-safe, and secure.
 
-
----
-
-**added 12 openai api**
-
-1	ai	Low Risk	OPENAI_API_KEY_1 & OPENAI_DEFAULT_MODEL_1
-2	ai	Moderate Risk	OPENAI_API_KEY_2 & OPENAI_DEFAULT_MODEL_2
-3	ai	High Risk	OPENAI_API_KEY_3 & OPENAI_DEFAULT_MODEL_3
-4	ai	Severe Risk	OPENAI_API_KEY_4 & OPENAI_DEFAULT_MODEL_4
-5	student	Low Risk	OPENAI_API_KEY_5 & OPENAI_DEFAULT_MODEL_5
-6	student	Moderate Risk	OPENAI_API_KEY_6 & OPENAI_DEFAULT_MODEL_6
-7	student	High Risk	OPENAI_API_KEY_7 & OPENAI_DEFAULT_MODEL_7
-8	student	Severe Risk	OPENAI_API_KEY_8 & OPENAI_DEFAULT_MODEL_8
-9	doctor	Low Risk	OPENAI_API_KEY_9 & OPENAI_DEFAULT_MODEL_9
-10	doctor	Moderate Risk	OPENAI_API_KEY_10 & OPENAI_DEFAULT_MODEL_10
-11	doctor	High Risk	OPENAI_API_KEY_11 & OPENAI_DEFAULT_MODEL_11
-12	doctor	Severe Risk	OPENAI_API_KEY_12 & OPENAI_DEFAULT_MODEL_12
-
----
