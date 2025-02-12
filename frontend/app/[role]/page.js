@@ -4,27 +4,27 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 
 export default function ChatBox() {
-  const params = useParams(); // 예상 역할: "ai", "student", "doctor"
+  const params = useParams(); // Expected Role: "ai", "student", "doctor"
   const chatContainerRef = useRef(null);
 
-  // 모든 역할에서 초기 인삿말 메시지를 제거하여 평가 화면부터 보이도록 설정
+  // Remove the initial greeting message from all roles, so that it appears only from the assessment screen
   const initialMessages = [];
 
-  // 채팅 관련 상태
+  // Chat related status
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 평가 상태 (모든 역할 전용)
+  // Assessment Status (all roles only)
   const [assessmentStep, setAssessmentStep] = useState(0);
   const [assessmentScore, setAssessmentScore] = useState(0);
   const [assessmentComplete, setAssessmentComplete] = useState(false);
   const [assessmentEnded, setAssessmentEnded] = useState(false);
 
-  // 평가가 완료되거나 거부될 때까지 평가 UI를 표시
+  // Display the assessment UI until the assessment is completed or rejected.
   const showAssessment = !assessmentComplete && !assessmentEnded;
 
-  // 평가 플로우: 버튼을 통해 5개 질문에 답변하여 점수를 산출
+  // Assessment Flow: Answer 5 questions via buttons to get a score
   const assessmentSteps = {
     0: {
       text: "Hello! I'm Dr. Sky, here to provide guidance on alcohol awareness and healthier choices. Before we begin, can I ask a couple of quick questions? Are you between the ages of 18 and 20?",
@@ -61,29 +61,110 @@ export default function ChatBox() {
         { text: "Weekly (4 pts)", score: 4, next: 4 },
         { text: "Occasionally (3 pts)", score: 3, next: 4 },
         { text: "Rarely (2 pts)", score: 2, next: 4 },
-        { text: "Never (0 pts) (Skip to CRAFFT)", score: 0, next: "result" },
+        { text: "Never (0 pts) (Skip to CRAFFT)", score: 0, next: 7 },
       ],
     },
     4: {
-      text: "How many drinks do you typically consume in one sitting?",
+      text: "In the past year, how many times have you had 4 (women) or 5 (men) or more drinks in a single day",
       options: [
-        { text: "1-2 drinks (1 pt)", score: 1, next: 5 },
-        { text: "3-4 drinks (2 pts)", score: 2, next: 5 },
-        { text: "5-6 drinks (3 pts)", score: 3, next: 5 },
-        { text: "More than 6 (4 pts)", score: 4, next: 5 },
-        { text: "None (0 pts)", score: 0, next: 5 },
+        { text: "Never (0 pts)", score: 0, next: 5 },
+        { text: "Less than once a month (1 pt)", score: 1, next: 5 },
+        { text: "1–3 times a month (2 pts)", score: 2, next: 5 },
+        { text: "1–2 times a week (3 pts)", score: 3, next: 5 },
+        { text: "More than twice a week (4 pts)", score: 4, next: 5 },
       ],
     },
     5: {
-      text: "Have you ever experienced any negative consequences from drinking?",
+      text: "On average, how many days per week do you drink alcohol?",
       options: [
-        { text: "Yes (4 pts)", score: 4, next: "result" },
-        { text: "No (0 pts)", score: 0, next: "result" },
+        { text: "0 days (0 pts)", score: 0, next: 6 },
+        { text: "1–2 days (1 pt)", score: 1, next: 6 },
+        { text: "3–4 days (2 pts)", score: 2, next: 6 },
+        { text: "5+ days (3 pts)", score: 3, next: 6 },
+      ],
+    },
+    6: {
+      text: "When you drink, how many drinks do you usually have in one sitting?",
+      options: [
+        { text: "1 drink (0 pts)", score: 0, next: 7 },
+        { text: "2–3 drinks (1 pt)", score: 1, next: 7 },
+        { text: "4–5 drinks (2 pts)", score: 2, next: 7 },
+        { text: "6+ drinks (3 pts)", score: 3, next: 7 },
+      ],
+    },
+    7: {
+      text: "Now, I’d like to ask a few questions about alcohol and substance use. Just answer honestly. there are no right or wrong answers! Have you ever ridden in a car driven by someone (including yourself) who was high or had been using alcohol or drugs?",
+      options: [
+        { text: "Yes (1 pt)", score: 1, next: 8 },
+        { text: "No (0 pts)", score: 0, next: 8 },
+      ],
+    },
+    8: {
+      text: "Do you ever use alcohol or drugs to relax, feel better about yourself, or fit in?",
+      options: [
+        { text: "Yes (1 pt)", score: 1, next: 9 },
+        { text: "No (0 pts)", score: 0, next: 9 },
+      ],
+    },
+    9: {
+      text: "Do you ever use alcohol or drugs when you are alone?",
+      options: [
+        { text: "Yes (1 pt)", score: 1, next: 10 },
+        { text: "No (0 pts)", score: 0, next: 10 },
+      ],
+    },
+    10: {
+      text: "Do you ever forget things you did while using alcohol or drugs?",
+      options: [
+        { text: "Yes (1 pt)", score: 1, next: 11 },
+        { text: "No (0 pts)", score: 0, next: 11 },
+      ],
+    },
+    11: {
+      text: "Have your family or friends ever told you that you should cut down on your drinking or drug use?",
+      options: [
+        { text: "Yes (1 pt)", score: 1, next: 12 },
+        { text: "No (0 pts)", score: 0, next: 12 },
+      ],
+    },
+    12: {
+      text: "Have you ever gotten into trouble while you were using alcohol or drugs?",
+      options: [
+        { text: "Yes (1 pt)", score: 1, next: 13 },
+        { text: "No (0 pts)", score: 0, next: 13 },
+      ],
+    },
+    13: {
+      text: "Thanks for sharing. What best describes your thoughts on alcohol and health?",
+      options: [
+        { text: " I think alcohol can be harmful, but I don’t know much about it", next: 14 },
+        { text: " I know the risks but don’t feel personally affected", next: 14 },
+        { text: " I’ve heard mixed information and want to learn more", next: 14 },
+        { text: " I don’t think it’s a big deal for me", next: 14 },
+        { text: " I actively try to drink less for health reasons", next: 14 },
+      ],
+    },
+    14: {
+      text: " Which of these statements feels most true for you?",
+      options: [
+        { text: " I’m already careful about my alcohol intake", next: 15 },
+        { text: " I sometimes wonder if I should cut down", next: 15 },
+        { text: " I don’t think about alcohol much, but I’m open to learning", next: 15 },
+        { text: " I don’t see a reason to change my drinking habits", next: 15 },
+        { text: " I want to cut back but don’t know where to start", next: 15 },
+      ],
+    },
+    15: {
+      text: " Based on what you've told me, would you be interested in exploring ways to build healthier habits around alcohol?",
+      options: [
+        { text: " Yes, that would be helpful", next: "result" },
+        { text: " Maybe, I’m open to learning more", next: "result" },
+        { text: " No, I just want general information for now", next: "result" },
       ],
     },
   };
 
-  // 평가 답변 처리 함수
+  // Assessment response processing function
   const handleAssessmentAnswer = (option) => {
     if (option.end) {
       setAssessmentEnded(true);
@@ -99,27 +180,27 @@ export default function ChatBox() {
     }
   };
 
-  // 평가 결과 계산 함수 (총 점수에 따른 위험 수준과 권장 조치)
+  // Assessment result calculation function (risk level and recommended action based on total score)
   const getRiskResult = () => {
     let riskLevel = "";
     let recommendation = "";
     if (assessmentScore <= 3) {
       riskLevel = "Low Risk (Safe Zone)";
-      recommendation = "일반적인 알코올 교육 및 책임 음주 가이드 제공";
+      recommendation = "Provides general alcohol education and responsible drinking guidance";
     } else if (assessmentScore <= 7) {
       riskLevel = "Moderate Risk (Caution)";
-      recommendation = "절제 음주 방법, 또래 압력 대처, 자기 모니터링 전략 안내";
+      recommendation = "Guide to moderate drinking, dealing with peer pressure, and self-monitoring strategies";
     } else if (assessmentScore <= 12) {
       riskLevel = "High Risk (Intervention)";
-      recommendation = "해로운 음주 완화 방안, 스트레스 관리 대안, 행동 변화 기법 제안";
+      recommendation = "Suggestions for harmful drinking mitigation, stress management alternatives, and behavior change techniques";
     } else {
       riskLevel = "Severe Risk (Critical)";
-      recommendation = "전문가 상담, 치료 프로그램 혹은 전문 서비스 연계 권장";
+      recommendation = "Recommend professional counseling, treatment programs, or referral to specialized services";
     }
     return { riskLevel, recommendation };
   };
 
-  // 채팅 API 호출 (평가 점수 포함)
+  // Chat API call (including assessment score)
   const sendToFlask = async (userInput) => {
     const roleMapping = { ai: "ai", student: "student", doctor: "doctor" };
     const chatbotType = roleMapping[params.role] || "ai";
@@ -144,7 +225,7 @@ export default function ChatBox() {
     }
   };
 
-  // 사용자가 메시지를 입력하면 채팅 API를 호출하고 응답을 표시
+  // When the user types a message, call the chat API and display a response.
   const handleAddMessage = async () => {
     if (!inputValue.trim()) return;
     const newUserMessage = {
@@ -182,7 +263,7 @@ export default function ChatBox() {
 
   return (
     <div className="grid md:grid-cols-[30%,auto] lg:grid-cols-[40%,auto] xl:grid-cols-[30%,auto] ">
-      {/* 사이드바 */}
+      {/* sidebar */}
       <div className="px-[15px] lg:px-[20px] xl:px-[40px] py-[40px]">
         <Image src="/logo.svg" width={182} height={40} alt="logo" />
         <div className="flex flex-col mt-[89px] justify-center items-center">
@@ -195,7 +276,7 @@ export default function ChatBox() {
         </div>
       </div>
 
-      {/* 메인 콘텐츠 영역 */}
+      {/* Main Content Area */}
       <div className="flex px-[20px] xl:px-[40px] py-[32px] flex-col md:h-screen justify-between bg-white flex-grow">
         <div className="flex items-center pb-[40px] gap-2 px-4">
           <div className="h-[1px] w-[40%] flex-grow bg-[#D9D9D9]"></div>
@@ -203,7 +284,7 @@ export default function ChatBox() {
           <div className="h-[1px] w-[40%] flex-grow-0 bg-[#D9D9D9]"></div>
         </div>
 
-        {/* 평가 UI (모든 역할 전용): 평가가 완료되기 전까지 표시 */}
+        {/* Assessment UI (all roles only): Displayed until the assessment is completed */}
         {showAssessment && (
           <div className="p-6 bg-gray-50 rounded-lg shadow-md flex flex-col items-center">
             {assessmentStep !== "result" ? (
@@ -251,7 +332,7 @@ export default function ChatBox() {
           </div>
         )}
 
-        {/* 평가 거부 시 */}
+        {/* when reject assessment */}
         {assessmentEnded && (
           <div className="p-6 bg-red-100 rounded-lg text-center">
             <p className="text-xl font-bold mb-2">Chat session ended.</p>
@@ -259,7 +340,7 @@ export default function ChatBox() {
           </div>
         )}
 
-        {/* 평가 완료 후에만 채팅 UI 표시 */}
+        {/* show chatting UI only after assessment */}
         {assessmentComplete && !assessmentEnded && (
           <>
             <div className="flex-grow overflow-y-auto custom-scrollbar" ref={chatContainerRef}>
@@ -297,7 +378,7 @@ export default function ChatBox() {
               )}
             </div>
 
-            {/* 채팅 입력 영역 */}
+            {/* chatting input area */}
             <div className="py-[24px] px-[12px] lg:px-[24px] rounded-[20px] border border-[#D9D9D9] bg-[#F6F6F2] flex items-center">
               <input
                 type="text"
@@ -315,7 +396,7 @@ export default function ChatBox() {
               </button>
             </div>
 
-            {/* 하단 아이콘 */}
+            {/* bottom icon */}
             <div className="flex items-center gap-[24px] mt-[12px]">
               <Image src="/A.svg" width={24} height={24} alt="A" />
               <Image src="/A2.svg" width={24} height={24} alt="A2" />
