@@ -21,9 +21,6 @@ export default function ChatBox() {
   const [assessmentScore, setAssessmentScore] = useState(0);
   const [assessmentEnded, setAssessmentEnded] = useState(false);
 
-  // Display the assessment UI until the assessment is completed or rejected.
-  const showAssessment = !assessmentComplete && !assessmentEnded;
-
   // Assessment Flow: Answer questions via buttons to get a score
   const assessmentSteps = {
     0: {
@@ -350,7 +347,7 @@ export default function ChatBox() {
         </div>
 
         {/* Action UI : assessment or chatting UI */}
-        {showAssessment && (
+        { !assessmentEnded && (
           <div className="p-6 bg-gray-50 rounded-lg shadow-md flex flex-col justify-start h-full">
             {assessmentStep !== "result" ? (
               <>
