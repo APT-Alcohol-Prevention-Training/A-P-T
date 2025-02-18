@@ -17,176 +17,25 @@ export default function ChatBox() {
   const [chatHistory, setChatHistory] = useState([]);
 
   // Assessment Status (all roles only)
-  const [assessmentStep, setAssessmentStep] = useState(0);
+  const [assessmentSteps, setAssessmentSteps] = useState({
+    text: "Hello! I'm Dr. Sky, here to provide guidance on alcohol awareness and healthier choices. Before we begin, can I ask a couple of quick questions? Are you between the ages of 18 and 20?",
+    options: [
+      { text: "Yes", next: "1" },
+      { text: "No", next: "confirm_continue" },
+    ],
+  });
   const [assessmentScore, setAssessmentScore] = useState(0);
-  const [assessmentEnded, setAssessmentEnded] = useState(false);
-
-  // Assessment Flow: Answer questions via buttons to get a score
-  const assessmentSteps = {
-    0: {
-      text: "Hello! I'm Dr. Sky, here to provide guidance on alcohol awareness and healthier choices. Before we begin, can I ask a couple of quick questions? Are you between the ages of 18 and 20?",
-      options: [
-        { text: "Yes", next: 1 },
-        { text: "No", next: "confirm_continue" },
-      ],
-    },
-    confirm_continue: {
-      text: "This assessment is designed for individuals between 18 and 20 years old. If you're younger or older, I can still provide general information on alcohol awareness. Would you like to continue?",
-      options: [
-        { text: "Yes, I'd still like to learn more", next: 1 },
-        { text: "No, I'd rather not", end: true },
-      ],
-    },
-    1: {
-      text: "Have you ever had alcohol before, even just a few sips?",
-      options: [
-        { text: "Yes", next: 2 },
-        { text: "No", next: 2 },
-      ],
-    },
-    2: {
-      text: "Thanks for sharing! Even if you don't drink, this assessment can help you learn more about alcohol risks and peer influences. Would you like to continue?",
-      options: [
-        { text: "Yes, let's do it!", next: 3 },
-        { text: "No, I just want general information.", end: true },
-      ],
-    },
-    3: {
-      text: "Great! Let's start with a few questions about your drinking habits. How often do you usually drink?",
-      options: [
-        { text: "Daily", score: 5, next: 4 },
-        { text: "Weekly", score: 4, next: 4 },
-        { text: "Occasionally", score: 3, next: 4 },
-        { text: "Rarely", score: 2, next: 4 },
-        { text: "Never", score: 0, next: 7 },
-      ],
-    },
-    4: {
-      text: "In the past year, how many times have you had 4 (women) or 5 (men) or more drinks in a single day",
-      options: [
-        { text: "Never", score: 0, next: 5 },
-        { text: "Less than once a month", score: 1, next: 5 },
-        { text: "1–3 times a month", score: 2, next: 5 },
-        { text: "1–2 times a week", score: 3, next: 5 },
-        { text: "More than twice a week", score: 4, next: 5 },
-      ],
-    },
-    5: {
-      text: "On average, how many days per week do you drink alcohol?",
-      options: [
-        { text: "0 days", score: 0, next: 6 },
-        { text: "1–2 days", score: 1, next: 6 },
-        { text: "3–4 days", score: 2, next: 6 },
-        { text: "5+ days", score: 3, next: 6 },
-      ],
-    },
-    6: {
-      text: "When you drink, how many drinks do you usually have in one sitting?",
-      options: [
-        { text: "1 drink", score: 0, next: 7 },
-        { text: "2–3 drinks", score: 1, next: 7 },
-        { text: "4–5 drinks", score: 2, next: 7 },
-        { text: "6+ drinks", score: 3, next: 7 },
-      ],
-    },
-    7: {
-      text: "Now, I’d like to ask a few questions about alcohol and substance use. Just answer honestly. there are no right or wrong answers! Have you ever ridden in a car driven by someone (including yourself) who was high or had been using alcohol or drugs?",
-      options: [
-        { text: "Yes", score: 1, next: 8 },
-        { text: "No", score: 0, next: 8 },
-      ],
-    },
-    8: {
-      text: "Do you ever use alcohol or drugs to relax, feel better about yourself, or fit in?",
-      options: [
-        { text: "Yes", score: 1, next: 9 },
-        { text: "No", score: 0, next: 9 },
-      ],
-    },
-    9: {
-      text: "Do you ever use alcohol or drugs when you are alone?",
-      options: [
-        { text: "Yes", score: 1, next: 10 },
-        { text: "No", score: 0, next: 10 },
-      ],
-    },
-    10: {
-      text: "Do you ever forget things you did while using alcohol or drugs?",
-      options: [
-        { text: "Yes", score: 1, next: 11 },
-        { text: "No", score: 0, next: 11 },
-      ],
-    },
-    11: {
-      text: "Have your family or friends ever told you that you should cut down on your drinking or drug use?",
-      options: [
-        { text: "Yes", score: 1, next: 12 },
-        { text: "No", score: 0, next: 12 },
-      ],
-    },
-    12: {
-      text: "Have you ever gotten into trouble while you were using alcohol or drugs?",
-      options: [
-        { text: "Yes", score: 1, next: 13 },
-        { text: "No", score: 0, next: 13 },
-      ],
-    },
-    13: {
-      text: "Thanks for sharing. What best describes your thoughts on alcohol and health?",
-      options: [
-        {
-          text: " I think alcohol can be harmful, but I don’t know much about it",
-          next: 14,
-        },
-        {
-          text: " I know the risks but don’t feel personally affected",
-          next: 14,
-        },
-        {
-          text: " I’ve heard mixed information and want to learn more",
-          next: 14,
-        },
-        { text: " I don’t think it’s a big deal for me", next: 14 },
-        { text: " I actively try to drink less for health reasons", next: 14 },
-      ],
-    },
-    14: {
-      text: " Which of these statements feels most true for you?",
-      options: [
-        { text: " I’m already careful about my alcohol intake", next: 15 },
-        { text: " I sometimes wonder if I should cut down", next: 15 },
-        {
-          text: " I don’t think about alcohol much, but I’m open to learning",
-          next: 15,
-        },
-        {
-          text: " I don’t see a reason to change my drinking habits",
-          next: 15,
-        },
-        { text: " I want to cut back but don’t know where to start", next: 15 },
-      ],
-    },
-    15: {
-      text: " Based on what you've told me, would you be interested in exploring ways to build healthier habits around alcohol?",
-      options: [
-        { text: " Yes, that would be helpful", next: "result" },
-        { text: " Maybe, I’m open to learning more", next: "result" },
-        {
-          text: " No, I just want general information for now",
-          next: "result",
-        },
-      ],
-    },
-  };
+  const [assessmentEnded, setAssessmentEnded] = useState(false); // if the assessment is rejected or not.
+  const [assessmentCompleted, setAssessmentCompleted] = useState(false); // if the assessment is completed or not.
 
   // Chat history adding function
   const addToChatHistory = (question, answer) => {
     setChatHistory((prev) => [...prev, { question, answer }]);
-  }
+  };
 
   // Assessment response processing function
   const handleAssessmentAnswer = (option) => {
-    addToChatHistory(assessmentSteps[assessmentStep].text, option.text);
+    addToChatHistory(assessmentSteps.text, option.text);
     if (option.end) {
       setAssessmentEnded(true);
       return;
@@ -194,10 +43,10 @@ export default function ChatBox() {
     const newScore = assessmentScore + (option.score || 0);
     if (option.next === "result") {
       setAssessmentScore(newScore);
-      setAssessmentStep("result");
+      setAssessmentCompleted(true);
     } else {
       setAssessmentScore(newScore);
-      setAssessmentStep(option.next);
+      getAssessmentStep(option.next); // get next assessment step
     }
   };
 
@@ -247,6 +96,33 @@ export default function ChatBox() {
     } catch (err) {
       console.error(err);
       return "Request failed.";
+    }
+  };
+
+  // When the user clicks option, get the next assessmentstep data.
+  const getAssessmentStep = async (stepkey) => {
+    try {
+      const res = await fetch(
+        "http://127.0.0.1:8000//api/get_assessment_step",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            stepKey: stepkey, // Send the next step key to the backend
+          }),
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+
+        // Update the assessment step with the full data received
+        setAssessmentSteps(data); // Store the new step data
+      } else {
+        console.error("Failed to fetch next step");
+      }
+    } catch (err) {
+      console.error("Error fetching assessment data:", err);
     }
   };
 
@@ -319,7 +195,6 @@ export default function ChatBox() {
         className="flex px-[20px] xl:px-[40px] py-[32px] flex-col md:h-screen justify-between bg-white flex-grow overflow-y-auto"
         ref={chatContainerRef}
       >
-        
         {/* Date of today */}
         <div className="flex items-center pb-[40px] gap-2 px-4">
           <div className="h-[1px] w-[40%] flex-grow bg-[#D9D9D9]"></div>
@@ -347,33 +222,33 @@ export default function ChatBox() {
         </div>
 
         {/* Action UI : assessment or chatting UI */}
-        { !assessmentEnded && (
+        {!assessmentEnded && (
           <div className="p-6 bg-gray-50 rounded-lg shadow-md flex flex-col justify-start h-full">
-            {assessmentStep !== "result" ? (
+            {!assessmentCompleted ? (
               <>
-              {/* Assessment UI (all roles only): Display question and option until the assessment is completed */}
+                {/* Assessment UI (all roles only): Display question and option until the assessment is completed */}
                 <p className="bg-[#E1E6F9] text-[#333] text-sm font-semibold px-4 py-2 rounded-2xl shadow-sm w-fit">
-                  {assessmentSteps[assessmentStep].text}
+                  {assessmentSteps.text}
                 </p>
                 <div className="flex flex-col gap-1 mb-4 items-center">
-                  {assessmentSteps[assessmentStep].options.map(
-                    (option, index) => (
-                      <div className="flex justify-end mt-2">
-                        <button
-                          key={index}
-                          onClick={() => handleAssessmentAnswer(option)}
-                          className="bg-[#F0EAD6] hover:bg-[#D6C4A1] text-[#333] text-sm font-semibold px-4 py-2 rounded-2xl shadow-sm w-fit"
-                        >
-                          {option.text}
-                        </button>
-                      </div>
-                    )
-                  )}
+                  {assessmentSteps.options.map((option, index) => (
+                    <div className="flex justify-end mt-2">
+                      <button
+                        key={index}
+                        onClick={() => handleAssessmentAnswer(option)}
+                        className="bg-[#F0EAD6] hover:bg-[#D6C4A1] text-[#333] text-sm font-semibold px-4 py-2 rounded-2xl shadow-sm w-fit"
+                      >
+                        {option.text}
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </>
             ) : (
               (() => {
-                {/* Chatting UI after assessment : only show after assessment */}
+                {
+                  /* Chatting UI after assessment : only show after assessment */
+                }
                 const { riskLevel, recommendation } = getRiskResult();
                 return (
                   <>

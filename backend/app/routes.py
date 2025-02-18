@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Blueprint, abort, jsonify, request, send_from_directory, session
 
 # Local imports for authentication, chatbot, and logging
@@ -80,3 +81,34 @@ def download_logs():
         abort(404, description="Log file not found.")
     except Exception as e:
         abort(500, description=str(e))
+
+@main_bp.route("/api/get_assessment_step", methods=["POST"])
+def get_assessment_step():
+    """
+    Endpoint to start assessment.
+    Receive stepKey, load the corresponding step data from the JSON file, and return it.
+    """
+    try:
+        # Load the JSON file every time this endpoint is hit
+        with open('assessment_data.json', 'r', encoding="utf-8") as f:
+            assessment_steps_data = json.load(f)
+
+        data = request.get_json()  # Get the JSON data from the request
+        step_key = data.get("stepKey")  # Extract stepKey from the request data
+        
+        if not step_key:
+            return jsonify({"error": "Missing stepKey parameter"}), 400
+
+        # Retrieve the assessment step data associated with the stepKey
+        step_data = assessment_steps_data.get(step_key)
+
+        if step_data:
+            return jsonify(step_data)  # Send back the corresponding step data
+        else:
+            return jsonify({"error": "Step not found"}), 404
+    except FileNotFoundError:
+        return jsonify({"error": "Assessment steps file not found"}), 500
+    except json.JSONDecodeError:
+        return jsonify({"error": "Failed to decode the assessment steps JSON"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Failed to load assessment steps: {str(e)}"}), 500
