@@ -1,8 +1,8 @@
 import "./globals.css";
 
 /*
-  Google Fonts 예시 (geistSans, geistMono)
-  필요 없으면 import 지워도 됩니다.
+  Google Fonts example (geistSans, geistMono)
+  If you don't need it, you can delete the import.
 */
 import { Geist, Geist_Mono } from "next/font/google";
 

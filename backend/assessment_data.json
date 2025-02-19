@@ -1,0 +1,138 @@
+{
+    "0": {
+      "text": "Hello! I'm Dr. Sky, here to provide guidance on alcohol awareness and healthier choices. Before we begin, can I ask a couple of quick questions? Are you between the ages of 18 and 20?",
+      "options": [
+        { "text": "Yes", "next": "1" },
+        { "text": "No", "next": "confirm_continue" }
+      ]
+    },
+    "confirm_continue": {
+      "text": "This assessment is designed for individuals between 18 and 20 years old. If you're younger or older, I can still provide general information on alcohol awareness. Would you like to continue?",
+      "options": [
+        { "text": "Yes, I'd still like to learn more", "next": "1" },
+        { "text": "No, I'd rather not", "end": true }
+      ]
+    },
+    "1": {
+      "text": "Have you ever had alcohol before, even just a few sips?",
+      "options": [
+        { "text": "Yes", "next": "2" },
+        { "text": "No", "next": "2" }
+      ]
+    },
+    "2": {
+      "text": "Thanks for sharing! Even if you don't drink, this assessment can help you learn more about alcohol risks and peer influences. Would you like to continue?",
+      "options": [
+        { "text": "Yes, let's do it!", "next": "3" },
+        { "text": "No, I just want general information.", "end": true }
+      ]
+    },
+    "3": {
+      "text": "Great! Let's start with a few questions about your drinking habits. How often do you usually drink?",
+      "options": [
+        { "text": "Daily", "score": 5, "next": "4" },
+        { "text": "Weekly", "score": 4, "next": "4" },
+        { "text": "Occasionally", "score": 3, "next": "4" },
+        { "text": "Rarely", "score": 2, "next": "4" },
+        { "text": "Never", "score": 0, "next": "7" }
+      ]
+    },
+    "4": {
+      "text": "In the past year, how many times have you had 4 (women) or 5 (men) or more drinks in a single day?",
+      "options": [
+        { "text": "Never", "score": 0, "next": "5" },
+        { "text": "Less than once a month", "score": 1, "next": "5" },
+        { "text": "1–3 times a month", "score": 2, "next": "5" },
+        { "text": "1–2 times a week", "score": 3, "next": "5" },
+        { "text": "More than twice a week", "score": 4, "next": "5" }
+      ]
+    },
+    "5": {
+      "text": "On average, how many days per week do you drink alcohol?",
+      "options": [
+        { "text": "0 days", "score": 0, "next": "6" },
+        { "text": "1–2 days", "score": 1, "next": "6" },
+        { "text": "3–4 days", "score": 2, "next": "6" },
+        { "text": "5+ days", "score": 3, "next": "6" }
+      ]
+    },
+    "6": {
+      "text": "When you drink, how many drinks do you usually have in one sitting?",
+      "options": [
+        { "text": "1 drink", "score": 0, "next": "7" },
+        { "text": "2–3 drinks", "score": 1, "next": "7" },
+        { "text": "4–5 drinks", "score": 2, "next": "7" },
+        { "text": "6+ drinks", "score": 3, "next": "7" }
+      ]
+    },
+    "7": {
+      "text": "Now, I’d like to ask a few questions about alcohol and substance use. Just answer honestly. There are no right or wrong answers! Have you ever ridden in a car driven by someone (including yourself) who was high or had been using alcohol or drugs?",
+      "options": [
+        { "text": "Yes", "score": 1, "next": "8" },
+        { "text": "No", "score": 0, "next": "8" }
+      ]
+    },
+    "8": {
+      "text": "Do you ever use alcohol or drugs to relax, feel better about yourself, or fit in?",
+      "options": [
+        { "text": "Yes", "score": 1, "next": "9" },
+        { "text": "No", "score": 0, "next": "9" }
+      ]
+    },
+    "9": {
+      "text": "Do you ever use alcohol or drugs when you are alone?",
+      "options": [
+        { "text": "Yes", "score": 1, "next": "10" },
+        { "text": "No", "score": 0, "next": "10" }
+      ]
+    },
+    "10": {
+      "text": "Do you ever forget things you did while using alcohol or drugs?",
+      "options": [
+        { "text": "Yes", "score": 1, "next": "11" },
+        { "text": "No", "score": 0, "next": "11" }
+      ]
+    },
+    "11": {
+      "text": "Have your family or friends ever told you that you should cut down on your drinking or drug use?",
+      "options": [
+        { "text": "Yes", "score": 1, "next": "12" },
+        { "text": "No", "score": 0, "next": "12" }
+      ]
+    },
+    "12": {
+      "text": "Have you ever gotten into trouble while you were using alcohol or drugs?",
+      "options": [
+        { "text": "Yes", "score": 1, "next": "13" },
+        { "text": "No", "score": 0, "next": "13" }
+      ]
+    },
+    "13": {
+      "text": "Thanks for sharing. What best describes your thoughts on alcohol and health?",
+      "options": [
+        { "text": "I think alcohol can be harmful, but I don’t know much about it", "next": "14" },
+        { "text": "I know the risks but don’t feel personally affected", "next": "14" },
+        { "text": "I’ve heard mixed information and want to learn more", "next": "14" },
+        { "text": "I don’t think it’s a big deal for me", "next": "14" },
+        { "text": "I actively try to drink less for health reasons", "next": "14" }
+      ]
+    },
+    "14": {
+      "text": "Which of these statements feels most true for you?",
+      "options": [
+        { "text": "I’m already careful about my alcohol intake", "next": "15" },
+        { "text": "I sometimes wonder if I should cut down", "next": "15" },
+        { "text": "I don’t think about alcohol much, but I’m open to learning", "next": "15" },
+        { "text": "I don’t see a reason to change my drinking habits", "next": "15" },
+        { "text": "I want to cut back but don’t know where to start", "next": "15" }
+      ]
+    },
+    "15": {
+      "text": "Based on what you've told me, would you be interested in exploring ways to build healthier habits around alcohol?",
+      "options": [
+        { "text": "Yes, that would be helpful", "next": "result" },
+        { "text": "Maybe, I’m open to learning more", "next": "result" },
+        { "text": "No, I just want general information for now", "next": "result" }
+      ]
+    }
+  }
