@@ -1,0 +1,39 @@
+{
+    "low_risk": [
+      {
+        "question": "What counts as a standard drink?",
+        "options": [
+          {"text": "A full glass of wine, a bottle of beer, or a shot of liquor", "correct": true},
+          {"text": "Any amount of alcohol in a cup", "correct": false},
+          {"text": "A cocktail with multiple types of alcohol", "correct": false}
+        ]
+      }
+    ],
+    "moderate_risk": [
+      {
+        "question": "How long does it take for your body to process ONE standard drink?",
+        "options": [
+          {"text": "15 minutes", "correct": false},
+          {"text": "1 hour", "correct": true},
+          {"text": "3 hours", "correct": false}
+        ]
+      }
+    ],
+    "high_risk": [      {
+        "question": "How long does it take for your body to process ONE standard drink?",
+        "options": [
+          {"text": "15 minutes", "correct": false},
+          {"text": "1 hour", "correct": true},
+          {"text": "3 hours", "correct": false}
+        ]
+      }],
+    "severe_risk": [      {
+        "question": "How long does it take for your body to process ONE standard drink?",
+        "options": [
+          {"text": "15 minutes", "correct": false},
+          {"text": "1 hour", "correct": true},
+          {"text": "3 hours", "correct": false}
+        ]
+      }]
+  }
+  

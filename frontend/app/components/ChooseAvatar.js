@@ -6,13 +6,13 @@ const roles = [
   {
     id: "ai",
     name: "ai",
-    image: "/ai.svg",
+    image: "/ai-chatbot.svg",
     alt: "ai",
   },
   {
     id: "doctor",
     name: "doctor",
-    image: "/doctor.svg",
+    image: "/doctor2.svg",
     alt: "doctor",
   },
   {
