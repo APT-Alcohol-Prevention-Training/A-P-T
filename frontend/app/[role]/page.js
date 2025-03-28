@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
-import Image from 'next/image';
+import Image from "next/image";
 
 // 정확한 이미지 매핑 (기존 사용 유지)
 const roleImageMap = {
@@ -11,7 +11,7 @@ const roleImageMap = {
 };
 
 export default function ChatBox() {
-  const params = useParams(); // ai, student, doctor
+  const params = useParams(); // "ai", "student", "doctor"
   const chatContainerRef = useRef(null);
 
   // 아바타 이미지 (기존 이미지 유지)
@@ -65,12 +65,11 @@ export default function ChatBox() {
   // Assessment 단계 불러오기
   const getAssessmentStep = async (stepkey) => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/get_assessment_step", {
+      const res = await fetch("http://34.68.0.228:8080/api/get_assessment_step", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stepKey: stepkey }),
       });
-
       if (res.ok) {
         const data = await res.json();
         setAssessmentSteps(data);
@@ -87,9 +86,8 @@ export default function ChatBox() {
     if (assessmentCompleted) {
       const riskLevel =
         assessmentScore <= 3 ? "low_risk" :
-          assessmentScore <= 7 ? "moderate_risk" :
-            assessmentScore <= 12 ? "high_risk" : "severe_risk";
-
+        assessmentScore <= 7 ? "moderate_risk" :
+        assessmentScore <= 12 ? "high_risk" : "severe_risk";
       fetch(`/training_data.json`)
         .then((res) => res.json())
         .then((data) => {
@@ -100,7 +98,6 @@ export default function ChatBox() {
     }
   }, [assessmentCompleted, assessmentScore]);
 
-
   // Training 질문 답변 처리 함수
   const handleTrainingAnswer = (isCorrect) => {
     if (isCorrect) {
@@ -108,7 +105,6 @@ export default function ChatBox() {
     } else {
       alert("Not quite! 🚫");
     }
-
     if (currentTrainingStep < trainingSteps.length - 1) {
       setCurrentTrainingStep((prev) => prev + 1);
     } else {
@@ -116,7 +112,7 @@ export default function ChatBox() {
     }
   };
 
-  // Assessment 점수 기반 Risk 결과 계산
+  // Assessment 점수 기반 Risk 결과 계산 함수
   const getRiskResult = () => {
     if (assessmentScore <= 3) {
       return { riskLevel: "Low Risk (Safe Zone)", recommendation: "General education" };
@@ -133,7 +129,6 @@ export default function ChatBox() {
   const sendToFlask = async (userInput) => {
     const roleMapping = { ai: "ai", student: "student", doctor: "doctor" };
     const chatbotType = roleMapping[params.role] || "ai";
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -155,27 +150,22 @@ export default function ChatBox() {
   // 실제 메시지 보내기 (AI 채팅 시 사용)
   const handleAddMessage = async () => {
     if (!inputValue.trim()) return;
-
     const newUserMessage = {
       id: Date.now(),
       type: "user",
       text: inputValue.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-
     setMessages((prev) => [...prev, newUserMessage]);
     setInputValue("");
     setLoading(true);
-
     const assistantResponse = await sendToFlask(newUserMessage.text);
-
     const newAssistantMessage = {
       id: Date.now() + 1,
       type: "assistant",
       text: assistantResponse,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-
     setMessages((prev) => [...prev, newAssistantMessage]);
     setLoading(false);
   };
@@ -196,7 +186,7 @@ export default function ChatBox() {
   useEffect(() => {
     console.log("Training completed?", trainingCompleted);
   }, [trainingCompleted]);
-  
+
   return (
     <div className="grid md:grid-cols-[30%,auto] lg:grid-cols-[40%,auto] xl:grid-cols-[30%,auto]">
       {/* Sidebar with Avatar Image */}
@@ -211,7 +201,7 @@ export default function ChatBox() {
           </div>
         </div>
       </div>
-  
+
       {/* Main Content Area */}
       <div
         className="flex flex-col px-[20px] xl:px-[40px] py-[32px] md:h-screen bg-white overflow-y-auto"
@@ -222,7 +212,7 @@ export default function ChatBox() {
           <p className="flex-shrink-0">{today}</p>
           <div className="h-[1px] w-[40%] bg-[#D9D9D9]" />
         </div>
-  
+
         {/* Chat History (Assessment / Training) */}
         <div className="space-y-2">
           {chatHistory.map((entry, idx) => (
@@ -231,17 +221,14 @@ export default function ChatBox() {
                 {entry.question}
               </p>
               <div className="flex justify-end mt-2">
-                <button
-                  className="bg-[#EDEDE8] text-sm px-4 py-2 rounded-2xl shadow-sm w-fit"
-                  disabled
-                >
+                <button className="bg-[#EDEDE8] text-sm px-4 py-2 rounded-2xl shadow-sm w-fit" disabled>
                   {entry.answer}
                 </button>
               </div>
             </div>
           ))}
         </div>
-  
+
         {/* Assessment UI */}
         {!assessmentEnded && !assessmentCompleted && (
           <div className="p-6 bg-gray-50 rounded-lg shadow-md">
@@ -260,7 +247,7 @@ export default function ChatBox() {
             ))}
           </div>
         )}
-  
+
         {/* Training UI */}
         {assessmentCompleted && !trainingCompleted && trainingSteps.length > 0 && (
           <div className="p-6 bg-[#FAFAF5] rounded-lg shadow-md">
@@ -278,7 +265,7 @@ export default function ChatBox() {
             ))}
           </div>
         )}
-  
+
         {/* AI Chat UI */}
         {assessmentCompleted && (trainingCompleted || messages.length > 0) && (
           <>
@@ -291,7 +278,7 @@ export default function ChatBox() {
               ))}
               {loading && <p className="text-sm">Loading...</p>}
             </div>
-  
+
             {/* Input Area */}
             <div className="py-[24px] px-[24px] rounded-[20px] border border-[#D9D9D9] bg-[#F6F6F2] flex items-center mt-4">
               <input
@@ -309,7 +296,7 @@ export default function ChatBox() {
                 <Image src="/send.svg" width={24} height={24} alt="send" />
               </button>
             </div>
-  
+
             {/* Bottom Icons */}
             <div className="flex items-center gap-[24px] mt-[12px]">
               <Image src="/A.svg" width={24} height={24} alt="A" />
@@ -322,7 +309,7 @@ export default function ChatBox() {
             </div>
           </>
         )}
-  
+
         {/* Rejected Assessment UI */}
         {assessmentEnded && (
           <div className="p-6 bg-red-100 rounded-lg text-center">
@@ -333,4 +320,4 @@ export default function ChatBox() {
       </div>
     </div>
   );
-}  
+}

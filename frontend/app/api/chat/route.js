@@ -5,7 +5,7 @@ export async function POST(req) {
     const { message, chatbot_type } = await req.json();
 
     // Flask 서버로 요청
-    const flaskRes = await fetch("http://127.0.0.1:8000/", {
+    const flaskRes = await fetch("http://34.68.0.228:8080/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, chatbot_type }),

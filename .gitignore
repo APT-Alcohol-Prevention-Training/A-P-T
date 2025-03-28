@@ -1,1 +1,16 @@
-fine-tuning.txt
+# Python 가상환경 관련 (프로젝트 구조에 따라 경로 수정)
+venv/
+backend/venv/
+pyvenv.cfg
+
+# Python 캐시 파일들
+__pycache__/
+*.pyc
+
+# 로그 파일들
+*.log
+frontend/frontend.log
+
+# 기타 빌드/패키징 결과물
+dist/
+build/
