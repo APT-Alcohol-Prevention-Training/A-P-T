@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 
-// 정확한 이미지 매핑 (기존 사용 유지)
+// 정확한 이미지 매핑
 const roleImageMap = {
   ai: "/ai-chatbot.svg",
   doctor: "/doctor2.svg",
@@ -14,7 +14,10 @@ export default function ChatBox() {
   const params = useParams(); // "ai", "student", "doctor"
   const chatContainerRef = useRef(null);
 
-  // 아바타 이미지 (기존 이미지 유지)
+  // Dark mode state toggle
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // 아바타 이미지
   const avatarImageSrc = roleImageMap[params.role];
 
   // 초기 상태
@@ -35,7 +38,7 @@ export default function ChatBox() {
   const [assessmentEnded, setAssessmentEnded] = useState(false);
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
 
-  // Training 상태 (추가 구현)
+  // Training 상태
   const [trainingSteps, setTrainingSteps] = useState([]);
   const [currentTrainingStep, setCurrentTrainingStep] = useState(0);
   const [trainingCompleted, setTrainingCompleted] = useState(false);
@@ -81,13 +84,17 @@ export default function ChatBox() {
     }
   };
 
-  // Training 질문/정답 데이터 로딩 (Assessment 완료 후)
+  // Training 질문/정답 데이터 로딩
   useEffect(() => {
     if (assessmentCompleted) {
       const riskLevel =
-        assessmentScore <= 3 ? "low_risk" :
-        assessmentScore <= 7 ? "moderate_risk" :
-        assessmentScore <= 12 ? "high_risk" : "severe_risk";
+        assessmentScore <= 3
+          ? "low_risk"
+          : assessmentScore <= 7
+          ? "moderate_risk"
+          : assessmentScore <= 12
+          ? "high_risk"
+          : "severe_risk";
       fetch(`/training_data.json`)
         .then((res) => res.json())
         .then((data) => {
@@ -108,24 +115,36 @@ export default function ChatBox() {
     if (currentTrainingStep < trainingSteps.length - 1) {
       setCurrentTrainingStep((prev) => prev + 1);
     } else {
-      setTrainingCompleted(true); // Training 완료 처리
+      setTrainingCompleted(true);
     }
   };
 
-  // Assessment 점수 기반 Risk 결과 계산 함수
+  // Risk 결과 계산 함수
   const getRiskResult = () => {
     if (assessmentScore <= 3) {
-      return { riskLevel: "Low Risk (Safe Zone)", recommendation: "General education" };
+      return {
+        riskLevel: "Low Risk (Safe Zone)",
+        recommendation: "General education",
+      };
     } else if (assessmentScore <= 7) {
-      return { riskLevel: "Moderate Risk (Caution)", recommendation: "Moderate drinking strategies" };
+      return {
+        riskLevel: "Moderate Risk (Caution)",
+        recommendation: "Moderate drinking strategies",
+      };
     } else if (assessmentScore <= 12) {
-      return { riskLevel: "High Risk (Intervention)", recommendation: "Harm reduction" };
+      return {
+        riskLevel: "High Risk (Intervention)",
+        recommendation: "Harm reduction",
+      };
     } else {
-      return { riskLevel: "Severe Risk (Critical)", recommendation: "Professional help" };
+      return {
+        riskLevel: "Severe Risk (Critical)",
+        recommendation: "Professional help",
+      };
     }
   };
 
-  // 채팅 메시지 처리 함수 (AI 채팅 시작 후)
+  // 채팅 메시지 처리 (AI 채팅)
   const sendToFlask = async (userInput) => {
     const roleMapping = { ai: "ai", student: "student", doctor: "doctor" };
     const chatbotType = roleMapping[params.role] || "ai";
@@ -147,14 +166,17 @@ export default function ChatBox() {
     }
   };
 
-  // 실제 메시지 보내기 (AI 채팅 시 사용)
+  // 메시지 보내기
   const handleAddMessage = async () => {
     if (!inputValue.trim()) return;
     const newUserMessage = {
       id: Date.now(),
       type: "user",
       text: inputValue.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     };
     setMessages((prev) => [...prev, newUserMessage]);
     setInputValue("");
@@ -164,7 +186,10 @@ export default function ChatBox() {
       id: Date.now() + 1,
       type: "assistant",
       text: assistantResponse,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     };
     setMessages((prev) => [...prev, newAssistantMessage]);
     setLoading(false);
@@ -188,135 +213,152 @@ export default function ChatBox() {
   }, [trainingCompleted]);
 
   return (
-    <div className="grid md:grid-cols-[30%,auto] lg:grid-cols-[40%,auto] xl:grid-cols-[30%,auto]">
-      {/* Sidebar with Avatar Image */}
-      <div className="px-[15px] lg:px-[20px] xl:px-[40px] py-[40px]">
-        <Image src="/logo.svg" width={182} height={40} alt="logo" />
-        <div className="flex flex-col mt-[89px] justify-center items-center">
-          <div className="mb-[80px]">
-            <Image src="/sky.svg" width={132} height={44} alt="sky" />
-          </div>
-          <div>
-            <Image src={avatarImageSrc} width={245} height={329} alt={params.role} />
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div
-        className="flex flex-col px-[20px] xl:px-[40px] py-[32px] md:h-screen bg-white overflow-y-auto"
-        ref={chatContainerRef}
-      >
-        <div className="flex items-center pb-[40px] gap-2 px-4">
-          <div className="h-[1px] w-[40%] bg-[#D9D9D9]" />
-          <p className="flex-shrink-0">{today}</p>
-          <div className="h-[1px] w-[40%] bg-[#D9D9D9]" />
-        </div>
-
-        {/* Chat History (Assessment / Training) */}
-        <div className="space-y-2">
-          {chatHistory.map((entry, idx) => (
-            <div key={idx}>
-              <p className="bg-[#E1E6F9] text-sm px-4 py-2 rounded-2xl shadow-sm w-fit">
-                {entry.question}
-              </p>
-              <div className="flex justify-end mt-2">
-                <button className="bg-[#EDEDE8] text-sm px-4 py-2 rounded-2xl shadow-sm w-fit" disabled>
-                  {entry.answer}
-                </button>
-              </div>
+    // Apply the dark class conditionally at the top-level container
+    <div className={isDarkMode ? "dark min-h-screen" : "min-h-screen"}>
+      {/* A wrapper that uses dark mode classes */}
+      <div className="grid md:grid-cols-[30%,auto] lg:grid-cols-[40%,auto] xl:grid-cols-[30%,auto] min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white">
+        {/* Sidebar */}
+        <div className="px-[15px] lg:px-[20px] xl:px-[40px] py-[40px] bg-white dark:bg-gray-800">
+          <Image src="/logo.svg" width={182} height={40} alt="logo" />
+          <div className="flex flex-col mt-[89px] justify-center items-center">
+            <div className="mb-[80px]">
+              <Image src="/sky.svg" width={132} height={44} alt="sky" />
             </div>
-          ))}
+            <div>
+              <Image src={avatarImageSrc} width={245} height={329} alt={params.role} />
+            </div>
+          </div>
         </div>
 
-        {/* Assessment UI */}
-        {!assessmentEnded && !assessmentCompleted && (
-          <div className="p-6 bg-gray-50 rounded-lg shadow-md">
-            <p className="font-semibold text-sm px-4 py-2 bg-[#E1E6F9] rounded-2xl w-fit">
-              {assessmentSteps.text}
-            </p>
-            {assessmentSteps.options.map((opt, idx) => (
-              <div key={idx} className="mt-2 flex justify-end">
+        {/* Main Content Area */}
+        <div
+          className="flex flex-col px-[20px] xl:px-[40px] py-[32px] md:h-screen dark:bg-gray-900 overflow-y-auto"
+          ref={chatContainerRef}
+        >
+          {/* Dark/Light Mode Toggle */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-700 text-black dark:text-white text-sm"
+            >
+              {isDarkMode ? "Light Mode" : "Dark Mode"}
+            </button>
+          </div>
+
+          {/* Date Divider */}
+          <div className="flex items-center pb-[40px] gap-2 px-4">
+            <div className="h-[1px] w-[40%] bg-[#D9D9D9] dark:bg-gray-700" />
+            <p className="flex-shrink-0">{today}</p>
+            <div className="h-[1px] w-[40%] bg-[#D9D9D9] dark:bg-gray-700" />
+          </div>
+
+          {/* Chat History (Assessment / Training) */}
+          <div className="space-y-2">
+            {chatHistory.map((entry, idx) => (
+              <div key={idx}>
+                <p className="bg-[#E1E6F9] dark:bg-[#2F3147] text-black dark:text-white text-sm px-4 py-2 rounded-2xl shadow-sm w-fit">
+                  {entry.question}
+                </p>
+                <div className="flex justify-end mt-2">
+                  <button
+                    className="bg-[#EDEDE8] dark:bg-gray-600 text-black dark:text-white text-sm px-4 py-2 rounded-2xl shadow-sm w-fit"
+                    disabled
+                  >
+                    {entry.answer}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Assessment UI */}
+          {!assessmentEnded && !assessmentCompleted && (
+            <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md my-4">
+              <p className="font-semibold text-sm px-4 py-2 bg-[#E1E6F9] dark:bg-[#3B3F52] text-black dark:text-white rounded-2xl w-fit">
+                {assessmentSteps.text}
+              </p>
+              {assessmentSteps.options.map((opt, idx) => (
+                <div key={idx} className="mt-2 flex justify-end">
+                  <button
+                    onClick={() => handleAssessmentAnswer(opt)}
+                    className="bg-[#F0EAD6] hover:bg-[#D6C4A1] dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white px-4 py-2 rounded-2xl shadow-sm"
+                  >
+                    {opt.text}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Training UI */}
+          {assessmentCompleted && !trainingCompleted && trainingSteps.length > 0 && (
+            <div className="p-6 bg-[#FAFAF5] dark:bg-gray-700 rounded-lg shadow-md my-4">
+              <p className="font-semibold mb-4 bg-[#E1E6F9] dark:bg-[#3B3F52] text-black dark:text-white px-4 py-2 rounded-2xl w-fit">
+                {trainingSteps[currentTrainingStep].question}
+              </p>
+              {trainingSteps[currentTrainingStep].options.map((opt, idx) => (
                 <button
-                  onClick={() => handleAssessmentAnswer(opt)}
-                  className="bg-[#F0EAD6] hover:bg-[#D6C4A1] px-4 py-2 rounded-2xl shadow-sm"
+                  key={idx}
+                  onClick={() => handleTrainingAnswer(opt.correct)}
+                  className="bg-[#F0EAD6] hover:bg-[#D6C4A1] dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white px-4 py-2 rounded-2xl shadow-sm m-2"
                 >
                   {opt.text}
                 </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Training UI */}
-        {assessmentCompleted && !trainingCompleted && trainingSteps.length > 0 && (
-          <div className="p-6 bg-[#FAFAF5] rounded-lg shadow-md">
-            <p className="font-semibold mb-4 bg-[#E1E6F9] px-4 py-2 rounded-2xl w-fit">
-              {trainingSteps[currentTrainingStep].question}
-            </p>
-            {trainingSteps[currentTrainingStep].options.map((opt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleTrainingAnswer(opt.correct)}
-                className="bg-[#F0EAD6] hover:bg-[#D6C4A1] px-4 py-2 rounded-2xl shadow-sm m-2"
-              >
-                {opt.text}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* AI Chat UI */}
-        {assessmentCompleted && (trainingCompleted || messages.length > 0) && (
-          <>
-            {/* 간단하게 메시지 렌더링 */}
-            <div>
-              {messages.map((msg, idx) => (
-                <p key={idx} className="text-sm">
-                  {msg.type}: {msg.text}
-                </p>
               ))}
-              {loading && <p className="text-sm">Loading...</p>}
             </div>
+          )}
 
-            {/* Input Area */}
-            <div className="py-[24px] px-[24px] rounded-[20px] border border-[#D9D9D9] bg-[#F6F6F2] flex items-center mt-4">
-              <input
-                type="text"
-                placeholder="What do you want to share today?"
-                className="flex-grow bg-transparent text-[16px] outline-none"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddMessage()}
-              />
-              <button
-                onClick={handleAddMessage}
-                className="bg-gradient-to-r w-[48px] h-[48px] from-[#28AAE1] via-[#0364B3] to-[#012B4D] text-white px-4 py-2 rounded-[12px] ml-2"
-              >
-                <Image src="/send.svg" width={24} height={24} alt="send" />
-              </button>
+          {/* AI Chat UI */}
+          {assessmentCompleted && (trainingCompleted || messages.length > 0) && (
+            <>
+              <div className="space-y-2">
+                {messages.map((msg, idx) => (
+                  <p key={idx} className="text-sm">
+                    <span className="font-semibold">{msg.type}:</span> {msg.text}
+                  </p>
+                ))}
+                {loading && <p className="text-sm">Loading...</p>}
+              </div>
+
+              {/* Input Area */}
+              <div className="py-[24px] px-[24px] rounded-[20px] border border-[#D9D9D9] dark:border-gray-600 bg-[#F6F6F2] dark:bg-gray-700 flex items-center mt-4">
+                <input
+                  type="text"
+                  placeholder="What do you want to share today?"
+                  className="flex-grow bg-transparent text-[16px] outline-none text-black dark:text-white"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddMessage()}
+                />
+                <button
+                  onClick={handleAddMessage}
+                  className="bg-gradient-to-r w-[48px] h-[48px] from-[#28AAE1] via-[#0364B3] to-[#012B4D] text-white px-4 py-2 rounded-[12px] ml-2"
+                >
+                  <Image src="/send.svg" width={24} height={24} alt="send" />
+                </button>
+              </div>
+
+              {/* Bottom Icons */}
+              <div className="flex items-center gap-[24px] mt-[12px]">
+                <Image src="/A.svg" width={24} height={24} alt="A" />
+                <Image src="/A2.svg" width={24} height={24} alt="A2" />
+                <Image src="/smile.svg" width={24} height={24} alt="smile" />
+                <Image src="/drive.svg" width={24} height={24} alt="drive" />
+                <Image src="/lock.svg" width={24} height={24} alt="lock" />
+                <Image src="/pen.svg" width={24} height={24} alt="pen" />
+                <Image src="/vertical.svg" width={24} height={24} alt="vertical" />
+              </div>
+            </>
+          )}
+
+          {/* Rejected Assessment UI */}
+          {assessmentEnded && (
+            <div className="p-6 bg-red-100 dark:bg-red-700 rounded-lg text-center my-4">
+              <p className="text-xl font-bold">Chat session ended.</p>
+              <p>You chose not to participate in the assessment.</p>
             </div>
-
-            {/* Bottom Icons */}
-            <div className="flex items-center gap-[24px] mt-[12px]">
-              <Image src="/A.svg" width={24} height={24} alt="A" />
-              <Image src="/A2.svg" width={24} height={24} alt="A2" />
-              <Image src="/smile.svg" width={24} height={24} alt="smile" />
-              <Image src="/drive.svg" width={24} height={24} alt="drive" />
-              <Image src="/lock.svg" width={24} height={24} alt="lock" />
-              <Image src="/pen.svg" width={24} height={24} alt="pen" />
-              <Image src="/vertical.svg" width={24} height={24} alt="vertical" />
-            </div>
-          </>
-        )}
-
-        {/* Rejected Assessment UI */}
-        {assessmentEnded && (
-          <div className="p-6 bg-red-100 rounded-lg text-center">
-            <p className="text-xl font-bold">Chat session ended.</p>
-            <p>You chose not to participate in the assessment.</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
