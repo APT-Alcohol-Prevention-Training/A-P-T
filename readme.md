@@ -28,7 +28,7 @@ A **simple research-oriented chatbot application** built with the **Flask** fram
 
 **Project Link:** [http://34.68.0.228:3000/](http://34.68.0.228:3000/) (Example)
 
-Date: *December 14, 2024 – January 29, 2025*
+Date: *December 14, 2024 – Present*
 
 ---
 
