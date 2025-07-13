@@ -14,3 +14,5 @@ frontend/frontend.log
 # 기타 빌드/패키징 결과물
 dist/
 build/
+
+backend/logger/logs/*.log

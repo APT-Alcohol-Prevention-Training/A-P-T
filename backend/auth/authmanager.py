@@ -5,13 +5,24 @@ from flask import Response, request
 
 
 class AuthManager:
-    admin_username = os.getenv("ADMIN_USERNAME")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-
     @classmethod
     def check_auth(cls, username, password):
         """Verify that provided credentials match the stored admin credentials."""
-        return username == cls.admin_username and password == cls.admin_password
+        # Get credentials dynamically
+        admin_username = os.getenv("ADMIN_USERNAME")
+        admin_password = os.getenv("ADMIN_PASSWORD")
+        
+        # Debug print
+        print(f"Checking auth - Expected: {admin_username}/{admin_password}")
+        print(f"Checking auth - Received: {username}/{password}")
+        
+        # Ensure credentials are set
+        if not admin_username or not admin_password:
+            print("Admin credentials not set in environment")
+            return False
+            
+        # Compare username and password
+        return username == admin_username and password == admin_password
 
     @staticmethod
     def authenticate():

@@ -1,279 +1,359 @@
-# **Research Chat Bot**
+# **Alcohol Prevention Training (APT) Chat Bot**
 
-A **simple research-oriented chatbot application** built with the **Flask** framework for the backend and **Next.js** for the frontend. This project includes interactive chat functionality, admin panel features, logging, and model fine-tuning capabilities using a chosen AI model (e.g., GPT-based). It is deployed on Google Cloud Platform (GCP).
+An interactive web application designed for alcohol awareness and prevention education, targeting young adults aged 18-20. This application combines AI-powered chatbots, interactive assessments, and scenario-based training to provide personalized guidance on responsible decision-making.
 
 ---
 
 ## **Table of Contents**
 
-1. [Introduction](#introduction)  
-2. [Key Features](#key-features)  
-3. [Installation & Setup](#installation--setup)  
-4. [Environment Variables](#environment-variables)  
-5. [Commands & Scripts](#commands--scripts)  
-6. [Frontend & Backend Cycle](#frontend--backend-cycle)  
-7. [Additional Notes](#additional-notes)  
-8. [Contributors](#contributors)  
-9. [License](#license)
+1. [Overview](#overview)
+2. [Key Features](#key-features)
+3. [Architecture](#architecture)
+4. [Installation & Setup](#installation--setup)
+5. [Environment Variables](#environment-variables)
+6. [API Endpoints](#api-endpoints)
+7. [Session Management](#session-management)
+8. [Security Features](#security-features)
+9. [Development](#development)
+10. [Deployment](#deployment)
+11. [Contributors](#contributors)
+12. [License](#license)
 
 ---
 
-## **Introduction**
+## **Overview**
 
-**Research Chat Bot** is designed to offer a streamlined, research-focused conversational environment.  
-- **Backend**: Python + Flask (with Gunicorn in production)  
-- **Frontend**: Next.js (JavaScript/TypeScript)  
-- **AI**: GPT-based capable of **fine-tuning**.  
-- **Deployment**: Hosted on **Google Cloud Platform (GCP)**.  
+The **APT Chat Bot** is an educational platform that helps young adults make informed decisions about alcohol consumption through:
+- Interactive conversations with AI personas
+- Risk assessment questionnaires
+- Real-world scenario training
+- Personalized feedback and guidance
 
-**Project Link:** [http://34.68.0.228:3000/](http://34.68.0.228:3000/) (Example)
-
-Date: *December 14, 2024 – Present*
+**Tech Stack:**
+- **Backend**: Python 3.11+ with Flask
+- **Frontend**: Next.js 15.1.3 with React 19
+- **AI**: OpenAI GPT-3.5/GPT-4
+- **Database**: CSV-based session storage
+- **Deployment**: Google Cloud Platform
 
 ---
 
 ## **Key Features**
 
-1. **Interactive Chat**  
-   - User can type a query; A-P-T expert chatbot responds with AI-generated text.  
-   - Real-time or near real-time updates.  
+### 1. **Multi-Persona AI Chatbots**
+Three distinct chatbot personalities to engage different user preferences:
+- **AI Assistant**: Informal, friendly, and approachable
+- **Student Peer**: Inquisitive, energetic, relatable
+- **Doctor/Professional**: Formal, knowledgeable, authoritative
 
-2. **Model Fine-Tuning**  
-   - Scripts (`fineTring.py`, `testfineTring.py`) to customize and test GPT-based models with a given dataset (`training_data.jsonl`).  
+### 2. **Interactive Assessment Flow**
+- Age verification (18-20 target demographic)
+- Drinking habit questionnaire
+- Risk score calculation (0-20 scale)
+- Personalized recommendations based on responses
 
-3. **Admin Panel**  
-   - Optional admin or management page (in the backend or a separate Next.js admin route) to view logs, manage configuration, etc.  
+### 3. **Scenario-Based Training**
+Real-world situations with interactive feedback:
+- **Party Scenario**: Handling peer pressure when offered drinks
+- **Concert Pre-game**: Setting boundaries before events
+- **Date Scenario**: Maintaining choices in social settings
 
-4. **Logging**  
-   - Logs stored in `logs/` folder for error tracking and usage analytics.  
+### 4. **Session Management System**
+- UUID-based session tracking
+- Individual CSV logs per user session
+- Conversation history with timestamps
+- Risk scores and scenario responses tracking
 
-5. **Deployment on GCP**  
-   - Flask server + Next.js frontend accessible at [http://34.68.0.228:3000/](http://34.68.0.228:3000/).  
-   - Gunicorn or similar WSGI server recommended in production for Flask.  
+### 5. **Admin Dashboard**
+- Protected admin panel for session management
+- Download individual or bulk session data
+- Real-time session monitoring
+- CSV export for analysis
 
 ---
 
+## **Architecture**
 
-## Installation & Setup
+```
+research-chat-bot/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py         # Flask app factory
+│   │   └── routes.py           # API endpoints
+│   ├── auth/
+│   │   └── authmanager.py      # Authentication system
+│   ├── chatbot/
+│   │   └── chatbot.py          # OpenAI integration & scenarios
+│   ├── logger/
+│   │   ├── custom_logger.py    # Legacy logging system
+│   │   ├── session_logger.py   # Session-based CSV logging
+│   │   └── session_logs/       # CSV storage directory
+│   ├── templates/
+│   │   └── sessions.html       # Admin dashboard UI
+│   ├── assessment_data.json    # Assessment questions
+│   ├── validators.py           # Input validation & sanitization
+│   ├── main.py                 # Application entry point
+│   ├── .env.example            # Environment template
+│   └── pyproject.toml          # Python dependencies
+├── frontend/
+│   ├── app/
+│   │   ├── [role]/page.js      # Dynamic chat interface
+│   │   ├── api/chat/route.js   # API proxy
+│   │   └── page.js             # Landing page
+│   ├── components/
+│   │   └── ChooseAvatar.js     # Avatar selection
+│   ├── public/
+│   │   └── training_data.json  # Scenario content
+│   └── package.json            # Node dependencies
+└── README.md
+```
 
-### Backend (Flask + Poetry)
+---
 
-1. **Clone the Repository**
+## **Installation & Setup**
 
+### Prerequisites
+- Python 3.11 or higher
+- Node.js 18 or higher
+- Poetry (Python package manager)
+
+### Backend Setup
+
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/Research-Chat-Bot.git
-   cd Research-Chat-Bot/backend
+   git clone https://github.com/APT-Alcohol-Prevention-Training/research-chat-bot.git
+   cd research-chat-bot/backend
    ```
 
-2. **Install Poetry** (if not already installed)
-
-   Follow the [Poetry installation guide](https://python-poetry.org/docs/#installation).
-
-3. **Install Dependencies**
-
-   Use Poetry to install all dependencies defined in `pyproject.toml`:
-
+2. **Install dependencies with Poetry**
    ```bash
    poetry install
    ```
 
-4. **Configure Environment Variables**
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-   Create a `.env` file in the `backend/` folder (see [Environment Variables](#environment-variables)).
-
-5. **Run the Flask Development Server**
-
-   For development use:
-
+4. **Run the Flask server**
    ```bash
    poetry run python main.py
    ```
+   The backend will start on `http://localhost:8080`
 
-   - Default URL: `http://127.0.0.1:8000`
+### Frontend Setup
 
-### Frontend (Next.js)
-
-1. **Navigate to the Frontend Folder**
-
+1. **Navigate to frontend directory**
    ```bash
    cd ../frontend
    ```
 
-2. **Install Dependencies**
-
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Run the Next.js Development Server**
-
+3. **Run the development server**
    ```bash
    npm run dev
    ```
-
-   - Default URL: `http://localhost:3000`
+   The frontend will start on `http://localhost:3000`
 
 ---
 
-## Environment Variables
+## **Environment Variables**
 
-In the `backend/` folder, create a `.env` file to store secrets and configuration details:
+Create a `.env` file in the `backend/` directory:
 
-```ini
-API_KEY=your-secret-api-key
-OPENAI_API_KEY=your-openai-key
-DATABASE_URL=mysql://user:password@host:port/dbname
-SECRET_KEY=supersecret
-FLASK_ENV=production
+```env
+# Flask Configuration
+FLASK_SECRET_KEY=your-secret-key-here
+
+# Admin Authentication
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-admin-password
+
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_DEFAULT_MODEL=gpt-3.5-turbo
 ```
 
-Your Flask application and related scripts will read these variables using `os.getenv("VARIABLE_NAME")` (with support from [python-dotenv](https://github.com/theskumar/python-dotenv)).
+---
+
+## **API Endpoints**
+
+### Public Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Health check |
+| POST | `/` | Main chatbot interaction |
+| POST | `/api/get_assessment_step` | Get assessment questions |
+
+### Protected Endpoints (Require Authentication)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/sessions` | List all sessions |
+| GET | `/download_session/<session_id>` | Download specific session CSV |
+| GET | `/download_all_sessions` | Export all sessions as CSV |
+| GET | `/session_management` | Admin dashboard UI |
+| GET | `/download_logs` | Download legacy logs |
+
+### Request/Response Examples
+
+**Chat Interaction**
+```json
+POST /
+{
+  "message": "Hello",
+  "chatbot_type": "ai",
+  "risk_score": 5,
+  "conversation_context": {
+    "party_scenario": 1
+  }
+}
+
+Response:
+{
+  "bot_response": "Hey there! How can I help you today?",
+  "session_id": "uuid-here"
+}
+```
 
 ---
 
-## Commands & Scripts
+## **Session Management**
 
-| **Command / Script**          | **Usage**                                           | **Description**                                                          |
-|-------------------------------|-----------------------------------------------------|--------------------------------------------------------------------------|
-| **Run Application**           | `poetry run python main.py`                         | Starts the Flask development server                                      |
-| **Fine-Tuning**               | `poetry run python fineTring.py`                    | Fine-tunes a model using `training_data.jsonl`                           |
-| **Test Fine-Tuning**          | `poetry run python testfineTring.py`                | Tests or validates the fine-tuned model                                  |
-| **API Model Script**          | `poetry run python apimodel.py`                     | Runs additional API-related logic (if applicable)                        |
-| **Update Poetry Dependencies**| `poetry update`                                     | Updates dependencies as per `pyproject.toml`                             |
-| **Next.js Development**       | `npm run dev`                                       | Runs Next.js in development mode (localhost:3000 by default)             |
-| **Next.js Build**             | `npm run build`                                     | Builds Next.js for production                                            |
-| **Next.js Start**             | `npm start`                                         | Starts Next.js in production mode (default port: 3000)                   |
+### Session Data Structure
 
----
+Each session CSV contains:
+- `session_id`: Unique identifier
+- `timestamp`: Conversation timestamp
+- `conversation_number`: Sequential message count
+- `chatbot_type`: Selected persona (ai/student/doctor)
+- `user_message`: User input
+- `bot_response`: AI response
+- `user_ip`: Client IP address
+- `risk_score`: Assessment score (0-20)
+- `scenario`: Active scenario number
 
-## Frontend & Backend Cycle
+### Admin Dashboard
 
-Data flows through the system as follows:
+Access the session management dashboard at:
+```
+http://localhost:8080/session_management
+```
 
-1. **User Input:** The user types a message in the Next.js chat interface.  
-2. **Backend Request:** The frontend sends the input to the Flask backend (e.g., `http://<SERVER_IP>:8000`).  
-3. **Processing:** The Flask app (via `main.py`) processes the request—calling the GPT-based model (or a fine-tuned variant) to generate a response.  
-4. **Response:** The AI model returns a response to Flask, which then sends it back to the frontend.  
-5. **Display:** The frontend displays the chatbot’s response to the user.
-
----
-
-## Additional Notes
-
-- **Production Deployment:**  
-  - Set `FLASK_ENV=production` in your `.env` file.
-  - Use a production server like Gunicorn:  
-    ```bash
-    gunicorn -w 4 -b 0.0.0.0:8080 main:app
-    ```
-- **HTTPS:**  
-  Configure SSL certificates (using a load balancer or reverse proxy) for secure connections.
-- **Database Integration:**  
-  Integrate an ORM or direct database calls if persistent storage is required.
-- **Logging:**  
-  Check the `logs/` folder for error logs and usage statistics.
-- **File Reorganization:**  
-  The project is now organized into modular components for improved maintainability and scalability.
+Features:
+- View active and completed sessions
+- Download individual session CSVs
+- Export all sessions for analysis
+- Real-time session monitoring
 
 ---
 
-## Contributors
+## **Security Features**
+
+### Input Validation
+- HTML/script tag removal
+- SQL injection prevention
+- XSS protection
+- Unicode security character filtering
+- Length limitations on all inputs
+
+### Authentication
+- HTTP Basic Auth for admin routes
+- Environment-based credentials
+- Session-based user tracking
+
+### CORS Configuration
+```python
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "http://34.31.208.12:3000",
+    "https://34.31.208.12:3000"
+]
+```
+
+---
+
+## **Development**
+
+### Code Quality Tools
+
+**Linting and Formatting**
+```bash
+poetry run ruff check .        # Lint code
+poetry run ruff format .       # Format code
+poetry run pyright            # Type checking
+```
+
+**Testing**
+```bash
+poetry run pytest             # Run tests
+poetry run pytest -v          # Verbose output
+```
+
+### Project Structure Guidelines
+- Follow Google Python Style Guide
+- Use type hints where applicable
+- Maintain comprehensive docstrings
+- Keep functions focused and testable
+
+---
+
+## **Deployment**
+
+### Production Considerations
+
+1. **Environment Setup**
+   - Set `FLASK_ENV=production`
+   - Use strong secret keys
+   - Enable HTTPS
+
+2. **Server Configuration**
+   ```bash
+   # Using Gunicorn
+   poetry run gunicorn -w 4 -b 0.0.0.0:8080 main:app
+   ```
+
+3. **Frontend Build**
+   ```bash
+   npm run build
+   npm start
+   ```
+
+### Google Cloud Platform Deployment
+
+The application is designed for GCP deployment with:
+- Compute Engine for hosting
+- Cloud Storage for logs
+- Load Balancer for HTTPS
+- Firewall rules for security
+
+---
+
+## **Contributors**
+
+- **Grace Jeonghyun Kim, Ph.D** – [UMD Directory](https://communication.umd.edu/directory/grace-jeonghyun-kim)  
+  *Role:* Project Manager & Research Lead
 
 - **Somy Park (박소미)** – [LinkedIn](https://www.linkedin.com/in/somy-park-4a45b2226/)  
-  *Role:* Backend organization & classification, AI model tuning
+  *Role:* Backend Development & AI Integration
+
 - **Sueun Cho (조수은)** – [LinkedIn](https://www.linkedin.com/in/sueun-cho-625262252/)  
-  *Role:* DevOps & AI model tuning
-- **Grace Jeonghyun Kim (김정현) Ph.D** – [UMD Directory](https://communication.umd.edu/directory/grace-jeonghyun-kim)  
-  *Role:* Project Manager
+  *Role:* DevOps & System Architecture
 
 ---
 
-## License
+## **License**
 
-This project is distributed under the [MIT License](LICENSE). Feel free to modify and distribute the software as per the terms detailed in the `LICENSE` file.
-
----
-
-> **Enjoy building and customizing your Research Chat Bot!**  
-> For questions or issues, please contact the contributors or open an issue in the repository.
-```
+This project is distributed under the [MIT License](LICENSE). See the `LICENSE` file for details.
 
 ---
 
-This revised README now clearly documents your project’s structure, setup (with Poetry for the backend), and overall workflow while ensuring that all instructions are detailed and concise.
-
-
----
-
-## Quality Checks & Commands
-
-To ensure the codebase adheres to formatting standards, passes linting, type checks, and other quality gates, use the following commands with Poetry.
-
-### Automatic Formatting & Import Sorting
-
-| **Command**                  | **Description**                                                                                 | **Usage**           |
-|------------------------------|-------------------------------------------------------------------------------------------------|---------------------|
-| **Format with Black**        | Automatically reformat your code to conform to [Black](https://black.readthedocs.io/).           | `poetry run black .` |
-| **Sort Imports with isort**  | Automatically sort and format your imports using [isort](https://pycqa.github.io/isort/).         | `poetry run isort .` |
-
-> **Note:** Running `poetry run black --check .` or `poetry run isort --check-only .` will only check for formatting issues without applying fixes. If files need reformatting, run the commands without the `--check` or `--check-only` flags.
-
-### Testing
-
-| **Command**             | **Description**                                                             | **Usage**             |
-|-------------------------|-----------------------------------------------------------------------------|-----------------------|
-| **Run Tests**           | Executes all unit tests using [pytest](https://docs.pytest.org/).            | `poetry run pytest`   |
-
-> **Note:** If "no tests ran" appears, ensure your test files are named according to the pytest conventions (e.g., `test_*.py`).
-
-### Linting & Type Checking
-
-| **Command**                      | **Description**                                                                              | **Usage**              |
-|----------------------------------|----------------------------------------------------------------------------------------------|------------------------|
-| **Lint with Flake8**             | Checks code for linting errors using [Flake8](https://flake8.pycqa.org/en/latest/).           | `poetry run flake8`    |
-| **Type Checking with mypy**      | Performs static type checking using [mypy](http://mypy-lang.org/).                           | `poetry run mypy .`    |
-
-### Security Scanning
-
-| **Command**                      | **Description**                                                                                          | **Usage**                  |
-|----------------------------------|----------------------------------------------------------------------------------------------------------|----------------------------|
-| **Security Scan with Bandit**    | Scans your project for common security issues using [Bandit](https://bandit.readthedocs.io/).             | `poetry run bandit -r .`    |
-
-### Example Workflow
-
-1. **Reformat Code & Sort Imports:**
-
-   Run:
-   
-   ```
-   poetry run black .
-   poetry run isort .
-   ```
-
-2. **Run Linting & Type Checks:**
-
-   Run:
-   
-   ```
-   poetry run flake8
-   poetry run mypy .
-   ```
-
-3. **Run Security Scan:**
-
-   Run:
-   
-   ```
-   poetry run bandit -r .
-   ```
-
-4. **Execute Tests:**
-
-   Run:
-   
-   ```
-   poetry run pytest
-   ```
-
-Following these commands ensures that your code remains consistently formatted, free of linting issues, type-safe, and secure.
-
+> **Making responsible choices, one conversation at a time.**  
+> For questions or support, please contact the development team or open an issue in the repository.

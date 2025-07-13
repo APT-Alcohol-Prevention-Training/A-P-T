@@ -28,15 +28,20 @@ export default function ChatBox() {
 
   // Assessment 상태
   const [assessmentSteps, setAssessmentSteps] = useState({
-    text: "Hello! I'm Dr. Sky, here to provide guidance on alcohol awareness and healthier choices. Before we begin, can I ask a couple of quick questions? Are you between the ages of 18 and 20?",
-    options: [
-      { text: "Yes", next: "1" },
-      { text: "No", next: "confirm_continue" },
-    ],
+    text: "Loading assessment questions...",
+    options: [],
   });
   const [assessmentScore, setAssessmentScore] = useState(0);
   const [assessmentEnded, setAssessmentEnded] = useState(false);
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
+  
+  // Conversation context state
+  const [conversationContext, setConversationContext] = useState({});
+  
+  // 페이지 로드 시 초기 평가 단계 로드
+  useEffect(() => {
+    getAssessmentStep("0");
+  }, []);
 
   // Training 상태
   const [trainingSteps, setTrainingSteps] = useState([]);
@@ -50,6 +55,7 @@ export default function ChatBox() {
 
   // Assessment 답변 처리
   const handleAssessmentAnswer = (option) => {
+    console.log("handleAssessmentAnswer called with option:", option);
     addToChatHistory(assessmentSteps.text, option.text);
     if (option.end) {
       setAssessmentEnded(true);
@@ -61,23 +67,30 @@ export default function ChatBox() {
       setAssessmentCompleted(true);
     } else {
       setAssessmentScore(newScore);
+      console.log("Calling getAssessmentStep with key:", option.next);
       getAssessmentStep(option.next);
     }
   };
 
   // Assessment 단계 불러오기
   const getAssessmentStep = async (stepkey) => {
+    console.log("getAssessmentStep called with key:", stepkey);
     try {
-      const res = await fetch("http://34.68.0.228:8080/api/get_assessment_step", {
+      console.log("Sending request to API endpoint");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/get_assessment_step`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stepKey: stepkey }),
       });
+      console.log("API response status:", res.status);
+      
       if (res.ok) {
         const data = await res.json();
+        console.log("Received assessment step data:", data);
         setAssessmentSteps(data);
       } else {
-        console.error("Failed to fetch next assessment step");
+        const errorText = await res.text();
+        console.error("Failed to fetch next assessment step:", res.status, errorText);
       }
     } catch (err) {
       console.error("Error fetching assessment data:", err);
@@ -87,6 +100,37 @@ export default function ChatBox() {
   // Training 질문/정답 데이터 로딩
   useEffect(() => {
     if (assessmentCompleted) {
+      // Add initial AI message when assessment completes
+      const initialMessage = {
+        id: Date.now(),
+        type: "assistant",
+        text: "Let's try a quick example together. It's something that could easily happen in real life, just imagine how you might respond if it were you",
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+      
+      // Add party scenario message after a short delay
+      const scenarioMessage = {
+        id: Date.now() + 1,
+        type: "assistant",
+        text: "You're at a party, hanging out with friends, when someone passes you a drink and says, \"Come on, just one won't hurt!\"",
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+      
+      setMessages([initialMessage]);
+      
+      // Send scenario message after 2 seconds
+      setTimeout(() => {
+        setMessages(prev => [...prev, scenarioMessage]);
+        // Set conversation context to track party scenario (1 for first scenario)
+        setConversationContext({ party_scenario: 1 });
+      }, 2000);
+      
       const riskLevel =
         assessmentScore <= 3
           ? "low_risk"
@@ -119,30 +163,6 @@ export default function ChatBox() {
     }
   };
 
-  // Risk 결과 계산 함수
-  const getRiskResult = () => {
-    if (assessmentScore <= 3) {
-      return {
-        riskLevel: "Low Risk (Safe Zone)",
-        recommendation: "General education",
-      };
-    } else if (assessmentScore <= 7) {
-      return {
-        riskLevel: "Moderate Risk (Caution)",
-        recommendation: "Moderate drinking strategies",
-      };
-    } else if (assessmentScore <= 12) {
-      return {
-        riskLevel: "High Risk (Intervention)",
-        recommendation: "Harm reduction",
-      };
-    } else {
-      return {
-        riskLevel: "Severe Risk (Critical)",
-        recommendation: "Professional help",
-      };
-    }
-  };
 
   // 채팅 메시지 처리 (AI 채팅)
   const sendToFlask = async (userInput) => {
@@ -156,9 +176,13 @@ export default function ChatBox() {
           message: userInput,
           chatbot_type: chatbotType,
           risk_score: assessmentScore,
+          conversation_context: conversationContext,
         }),
       });
       const data = await res.json();
+      
+      // Don't clear context yet - we need it to check for scenario progression
+      
       return data.bot_response || `Error: ${data.error || "Unknown error"}`;
     } catch (err) {
       console.error(err);
@@ -193,6 +217,39 @@ export default function ChatBox() {
     };
     setMessages((prev) => [...prev, newAssistantMessage]);
     setLoading(false);
+    
+    // Handle scenario progression
+    if (conversationContext.party_scenario === 1) {
+      // After first scenario, send second scenario
+      setTimeout(() => {
+        const secondScenarioMessage = {
+          id: Date.now() + 2,
+          type: "assistant",
+          text: "Your friends say they're going to pre-game before the concert and ask if you're in. One says, 'It'll be more fun if you're not the only sober one.'",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+        setMessages(prev => [...prev, secondScenarioMessage]);
+        setConversationContext({ party_scenario: 2 });
+      }, 2000);
+    } else if (conversationContext.party_scenario === 2) {
+      // After second scenario, send third scenario
+      setTimeout(() => {
+        const thirdScenarioMessage = {
+          id: Date.now() + 3,
+          type: "assistant",
+          text: "You're on a first date. They order drinks and say, 'Let's have some fun tonight!' but you weren't planning to drink.",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+        setMessages(prev => [...prev, thirdScenarioMessage]);
+        setConversationContext({ party_scenario: 3 });
+      }, 2000);
+    }
   };
 
   // 채팅 스크롤 자동 조정
@@ -313,11 +370,25 @@ export default function ChatBox() {
             <>
               <div className="space-y-2">
                 {messages.map((msg, idx) => (
-                  <p key={idx} className="text-sm">
-                    <span className="font-semibold">{msg.type}:</span> {msg.text}
-                  </p>
+                  <div key={idx}>
+                    {msg.type === "assistant" ? (
+                      <p className="bg-[#E1E6F9] dark:bg-[#2F3147] text-black dark:text-white text-sm px-4 py-2 rounded-2xl shadow-sm w-fit">
+                        {msg.text}
+                      </p>
+                    ) : (
+                      <div className="flex justify-end mt-2">
+                        <p className="bg-[#EDEDE8] dark:bg-gray-600 text-black dark:text-white text-sm px-4 py-2 rounded-2xl shadow-sm w-fit">
+                          {msg.text}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ))}
-                {loading && <p className="text-sm">Loading...</p>}
+                {loading && (
+                  <p className="bg-[#E1E6F9] dark:bg-[#2F3147] text-black dark:text-white text-sm px-4 py-2 rounded-2xl shadow-sm w-fit">
+                    Loading...
+                  </p>
+                )}
               </div>
 
               {/* Input Area */}
