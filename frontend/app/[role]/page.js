@@ -36,6 +36,8 @@ export default function ChatBox() {
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]); // 모든 평가 답변 저장
   const [assessmentLoading, setAssessmentLoading] = useState(false); // 중복 클릭 방지
+  const [lastClickTime, setLastClickTime] = useState(0); // 마지막 클릭 시간
+  const processingRef = useRef(false); // 처리 중 플래그
   
   // Conversation context state
   const [conversationContext, setConversationContext] = useState({});
@@ -57,11 +59,24 @@ export default function ChatBox() {
 
   // Assessment 답변 처리
   const handleAssessmentAnswer = (option) => {
+    // useRef를 사용한 즉각적인 중복 클릭 방지
+    if (processingRef.current) {
+      return;
+    }
+    
+    // 중복 클릭 방지 - 300ms 이내 재클릭 무시
+    const now = Date.now();
+    if (now - lastClickTime < 300) {
+      return;
+    }
+    
     // 중복 클릭 방지
     if (assessmentLoading || assessmentCompleted) {
       return;
     }
     
+    processingRef.current = true;
+    setLastClickTime(now);
     setAssessmentLoading(true);
     console.log("handleAssessmentAnswer called with option:", option);
     addToChatHistory(assessmentSteps.text, option.text);
@@ -79,6 +94,7 @@ export default function ChatBox() {
     if (option.end) {
       setAssessmentEnded(true);
       setAssessmentLoading(false);
+      processingRef.current = false;
       return;
     }
     const newScore = assessmentScore + (option.score || 0);
@@ -86,6 +102,7 @@ export default function ChatBox() {
       setAssessmentScore(newScore);
       setAssessmentCompleted(true);
       setAssessmentLoading(false);
+      processingRef.current = false;
     } else {
       setAssessmentScore(newScore);
       console.log("Calling getAssessmentStep with key:", option.next);
@@ -110,14 +127,17 @@ export default function ChatBox() {
         console.log("Received assessment step data:", data);
         setAssessmentSteps({...data, key: stepkey});
         setAssessmentLoading(false); // 로딩 완료
+        processingRef.current = false; // 처리 완료
       } else {
         const errorText = res ? await res.text() : 'Network error';
         console.error("Failed to fetch next assessment step:", res?.status || 'No response', errorText);
         setAssessmentLoading(false); // 에러 시에도 로딩 해제
+        processingRef.current = false; // 처리 완료
       }
     } catch (err) {
       console.error("Error fetching assessment data:", err);
       setAssessmentLoading(false); // 에러 시에도 로딩 해제
+      processingRef.current = false; // 처리 완료
     }
   };
 
