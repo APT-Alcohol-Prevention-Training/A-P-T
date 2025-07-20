@@ -34,6 +34,7 @@ export default function ChatBox() {
   const [assessmentScore, setAssessmentScore] = useState(0);
   const [assessmentEnded, setAssessmentEnded] = useState(false);
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
+  const [assessmentAnswers, setAssessmentAnswers] = useState([]); // 모든 평가 답변 저장
   
   // Conversation context state
   const [conversationContext, setConversationContext] = useState({});
@@ -57,6 +58,17 @@ export default function ChatBox() {
   const handleAssessmentAnswer = (option) => {
     console.log("handleAssessmentAnswer called with option:", option);
     addToChatHistory(assessmentSteps.text, option.text);
+    
+    // 선택한 답변 기록
+    const answerRecord = {
+      question: assessmentSteps.text,
+      selectedOption: option.text,
+      score: option.score || 0,
+      timestamp: new Date().toISOString(),
+      stepKey: assessmentSteps.key || `step_${assessmentAnswers.length + 1}`
+    };
+    setAssessmentAnswers(prev => [...prev, answerRecord]);
+    
     if (option.end) {
       setAssessmentEnded(true);
       return;
@@ -82,15 +94,15 @@ export default function ChatBox() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stepKey: stepkey }),
       });
-      console.log("API response status:", res.status);
+      console.log("API response status:", res?.status);
       
-      if (res.ok) {
+      if (res?.ok) {
         const data = await res.json();
         console.log("Received assessment step data:", data);
-        setAssessmentSteps(data);
+        setAssessmentSteps({...data, key: stepkey});
       } else {
-        const errorText = await res.text();
-        console.error("Failed to fetch next assessment step:", res.status, errorText);
+        const errorText = res ? await res.text() : 'Network error';
+        console.error("Failed to fetch next assessment step:", res?.status || 'No response', errorText);
       }
     } catch (err) {
       console.error("Error fetching assessment data:", err);
@@ -176,17 +188,28 @@ export default function ChatBox() {
           message: userInput,
           chatbot_type: chatbotType,
           risk_score: assessmentScore,
-          conversation_context: conversationContext,
+          conversation_context: {
+            ...conversationContext,
+            assessment_answers: assessmentAnswers,
+            chat_history: messages.map(msg => ({
+              type: msg.type,
+              text: msg.text,
+              timestamp: msg.timestamp
+            }))
+          },
         }),
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Network error' }));
+        return `Error: ${errorData.error || `HTTP ${res.status}`}`;
+      }
+      
       const data = await res.json();
-      
-      // Don't clear context yet - we need it to check for scenario progression
-      
       return data.bot_response || `Error: ${data.error || "Unknown error"}`;
     } catch (err) {
-      console.error(err);
-      return "Request failed.";
+      console.error("Chat request failed:", err);
+      return "Sorry, I encountered an error. Please try again.";
     }
   };
 

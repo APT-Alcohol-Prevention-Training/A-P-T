@@ -25,6 +25,7 @@ from chatbot.chatbot import Chatbot
 from logger.custom_logger import Logger
 from logger.session_logger import session_logger
 from validators import InputValidator
+from config import current_config
 
 
 main_bp = Blueprint("main_bp", __name__)
@@ -79,15 +80,27 @@ def home():
         )
 
         # Get chatbot response (passing risk_score if available)
-        bot_response = Chatbot.get_response(
-            chatbot_type, user_message, risk_score, None, conversation_context
-        )
+        try:
+            bot_response = Chatbot.get_response(
+                chatbot_type, user_message, risk_score, None, conversation_context
+            )
+        except ValueError as e:
+            abort(400, description=str(e))
+        except RuntimeError as e:
+            abort(503, description=str(e))
+        except Exception as e:
+            config = current_config()
+            if config.DEBUG:
+                abort(500, description=f"Unexpected error: {str(e)}")
+            else:
+                abort(500, description="An unexpected error occurred")
 
         # Get or create session
+        config = current_config()
         user_ip = request.remote_addr or "Unknown"
         if "session_id" not in session:
             session["session_id"] = session_logger.create_session(user_ip)
-            session.permanent = True  # Make session persistent
+            session.permanent = config.SESSION_PERMANENT
         
         # Log to both traditional logger and session logger
         Logger.log_conversation(chatbot_type, user_message, bot_response, user_ip)
@@ -116,10 +129,11 @@ def download_logs():
     Raises:
         404: Log file not found.
     """
-    log_dir = os.path.dirname(Logger.log_file_path)
-    if not os.path.exists(os.path.join(log_dir, "conversations.log")):
+    config = current_config()
+    log_file = config.LOG_DIR / "conversations.log"
+    if not log_file.exists():
         abort(404, description="Log file not found")
-    return send_from_directory(log_dir, "conversations.log", as_attachment=True)
+    return send_from_directory(str(config.LOG_DIR), "conversations.log", as_attachment=True)
 
 
 @main_bp.route("/download_session/<session_id>")
@@ -217,6 +231,50 @@ def session_management():
     """
     return render_template("sessions.html")
 
+
+@main_bp.route("/download")
+def download_data():
+    """Public endpoint to download all session data as CSV.
+    
+    This is a simplified endpoint that doesn't require authentication,
+    allowing users to download all session data by visiting the URL directly.
+    
+    Returns:
+        CSV file download with all session data.
+        
+    Raises:
+        404: No session data found.
+    """
+    # Create temporary file for the consolidated CSV
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp:
+        tmp_path = tmp.name
+    
+    # Export all sessions to the temporary file
+    count = session_logger.export_all_sessions_to_csv(tmp_path)
+    
+    if count == 0:
+        os.unlink(tmp_path)
+        abort(404, description="No session data found")
+    
+    # Send the file
+    directory = os.path.dirname(tmp_path)
+    filename = os.path.basename(tmp_path)
+    
+    @after_this_request
+    def remove_file(response):  # pyright: ignore[reportUnusedFunction]
+        """Clean up temporary file after sending response."""
+        try:
+            os.unlink(tmp_path)
+        except Exception:
+            pass
+        return response
+    
+    return send_from_directory(
+        directory, filename, 
+        as_attachment=True,
+        download_name=f"apt_session_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    )
+
 @main_bp.route("/api/get_assessment_step", methods=["POST"])
 def get_assessment_step():
     """Get assessment step data by step key.
@@ -233,12 +291,14 @@ def get_assessment_step():
         500: Server error loading assessment data.
     """
     try:
-        # Load the JSON file from the backend directory
-        assessment_file_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 
-            'assessment_data.json'
-        )
-        with open(assessment_file_path, 'r', encoding="utf-8") as f:
+        # Load the JSON file from the configured path
+        config = current_config()
+        
+        # Check if assessment feature is enabled
+        if not config.FEATURE_ASSESSMENT:
+            return jsonify({"error": "Assessment feature is disabled"}), 403
+            
+        with open(config.ASSESSMENT_DATA_FILE, 'r', encoding="utf-8") as f:
             assessment_steps_data = json.load(f)
 
         data = request.get_json()
