@@ -35,6 +35,7 @@ export default function ChatBox() {
   const [assessmentEnded, setAssessmentEnded] = useState(false);
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]); // 모든 평가 답변 저장
+  const [assessmentLoading, setAssessmentLoading] = useState(false); // 중복 클릭 방지
   
   // Conversation context state
   const [conversationContext, setConversationContext] = useState({});
@@ -56,6 +57,12 @@ export default function ChatBox() {
 
   // Assessment 답변 처리
   const handleAssessmentAnswer = (option) => {
+    // 중복 클릭 방지
+    if (assessmentLoading || assessmentCompleted) {
+      return;
+    }
+    
+    setAssessmentLoading(true);
     console.log("handleAssessmentAnswer called with option:", option);
     addToChatHistory(assessmentSteps.text, option.text);
     
@@ -71,12 +78,14 @@ export default function ChatBox() {
     
     if (option.end) {
       setAssessmentEnded(true);
+      setAssessmentLoading(false);
       return;
     }
     const newScore = assessmentScore + (option.score || 0);
     if (option.next === "result") {
       setAssessmentScore(newScore);
       setAssessmentCompleted(true);
+      setAssessmentLoading(false);
     } else {
       setAssessmentScore(newScore);
       console.log("Calling getAssessmentStep with key:", option.next);
@@ -100,12 +109,15 @@ export default function ChatBox() {
         const data = await res.json();
         console.log("Received assessment step data:", data);
         setAssessmentSteps({...data, key: stepkey});
+        setAssessmentLoading(false); // 로딩 완료
       } else {
         const errorText = res ? await res.text() : 'Network error';
         console.error("Failed to fetch next assessment step:", res?.status || 'No response', errorText);
+        setAssessmentLoading(false); // 에러 시에도 로딩 해제
       }
     } catch (err) {
       console.error("Error fetching assessment data:", err);
+      setAssessmentLoading(false); // 에러 시에도 로딩 해제
     }
   };
 
@@ -361,9 +373,14 @@ export default function ChatBox() {
                 <div key={idx} className="mt-2 flex justify-end">
                   <button
                     onClick={() => handleAssessmentAnswer(opt)}
-                    className="bg-[#F0EAD6] hover:bg-[#D6C4A1] dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white px-4 py-2 rounded-2xl shadow-sm"
+                    disabled={assessmentLoading}
+                    className={`px-4 py-2 rounded-2xl shadow-sm text-black dark:text-white ${
+                      assessmentLoading 
+                        ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed opacity-50' 
+                        : 'bg-[#F0EAD6] hover:bg-[#D6C4A1] dark:bg-gray-600 dark:hover:bg-gray-500'
+                    }`}
                   >
-                    {opt.text}
+                    {assessmentLoading ? '로딩 중...' : opt.text}
                   </button>
                 </div>
               ))}
