@@ -5,7 +5,7 @@ export async function POST(req) {
     const { message, chatbot_type, risk_score, conversation_context } = await req.json();
 
     // Flask 서버로 요청
-    const flaskRes = await fetch(`${process.env.BACKEND_API_URL || 'http://localhost:8080'}/`, {
+    const flaskRes = await fetch(`${process.env.BACKEND_API_URL || 'http://localhost:8000'}/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, chatbot_type, risk_score, conversation_context }),
@@ -14,7 +14,6 @@ export async function POST(req) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error in /api/chat route:", error);
-    return NextResponse.json({ error: "!!Server error!!" }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

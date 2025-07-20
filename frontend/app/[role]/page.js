@@ -115,7 +115,7 @@ export default function ChatBox() {
     console.log("getAssessmentStep called with key:", stepkey);
     try {
       console.log("Sending request to API endpoint");
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/get_assessment_step`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/get_assessment_step`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stepKey: stepkey }),
