@@ -1,40 +1,50 @@
-import os
 import re
 from datetime import datetime
 import json
+from config import current_config
 
 class Logger:
-    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
-    log_file_name = "conversations.log"
-    log_file_path = os.path.join(log_dir, log_file_name)
-
+    @classmethod
+    def _get_config(cls):
+        """Get current configuration."""
+        return current_config()
+    
     @classmethod
     def init(cls):
         """Ensure that the log directory exists."""
-        dir_path = os.path.dirname(cls.log_file_path)
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        config = cls._get_config()
+        # Log directory is created by config.create_directories()
+        # This method is kept for backward compatibility
+        pass
 
     @classmethod
     def log_conversation(cls, chatbot_type, user_message, bot_response, user_ip):
         """Log the conversation with a timestamp and a masked IP address."""
-        cls.init()
+        config = cls._get_config()
+        
+        # Only log if logging to file is enabled
+        if not config.LOG_TO_FILE:
+            return
+            
         masked_ip = cls.mask_ip(user_ip)
         
         # Create JSON format log entry
         log_data = {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": datetime.now().strftime(config.LOG_DATE_FORMAT),
             "ip_address": masked_ip,
             "chatbot_type": chatbot_type,
             "user_message": user_message,
             "bot_response": bot_response
         }
         
+        log_file_path = config.LOG_DIR / "conversations.log"
+        
         try:
-            with open(cls.log_file_path, "a", encoding="utf-8") as log_file:
+            with open(log_file_path, "a", encoding="utf-8") as log_file:
                 log_file.write(json.dumps(log_data) + "\n")
         except Exception as e:
-            print(f"Error logging conversation: {e}")
+            if config.DEBUG:
+                print(f"Error logging conversation: {e}")
 
     @staticmethod
     def mask_ip(ip_address):

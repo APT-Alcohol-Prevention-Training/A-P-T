@@ -1,24 +1,24 @@
-import os
 from functools import wraps
-
 from flask import Response, request
+from config import current_config
 
 
 class AuthManager:
     @classmethod
     def check_auth(cls, username, password):
         """Verify that provided credentials match the stored admin credentials."""
-        # Get credentials dynamically
-        admin_username = os.getenv("ADMIN_USERNAME")
-        admin_password = os.getenv("ADMIN_PASSWORD")
+        config = current_config()
         
-        # Debug print
-        print(f"Checking auth - Expected: {admin_username}/{admin_password}")
-        print(f"Checking auth - Received: {username}/{password}")
+        # Check if authentication is enabled
+        if not config.AUTH_ENABLED:
+            return True
+        
+        # Get credentials from config
+        admin_username = config.ADMIN_USERNAME
+        admin_password = config.ADMIN_PASSWORD
         
         # Ensure credentials are set
         if not admin_username or not admin_password:
-            print("Admin credentials not set in environment")
             return False
             
         # Compare username and password

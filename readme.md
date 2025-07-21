@@ -93,7 +93,7 @@ research-chat-bot/
 │   ├── assessment_data.json    # Assessment questions
 │   ├── validators.py           # Input validation & sanitization
 │   ├── main.py                 # Application entry point
-│   ├── .env.example            # Environment template
+│   ├── .env                    # Environment variables
 │   └── pyproject.toml          # Python dependencies
 ├── frontend/
 │   ├── app/
@@ -132,7 +132,6 @@ research-chat-bot/
 
 3. **Configure environment variables**
    ```bash
-   cp .env.example .env
    # Edit .env with your configuration
    ```
 

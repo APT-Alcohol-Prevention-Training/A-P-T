@@ -12,4 +12,5 @@ models = openai.models.list()
 
 # 모델 목록 출력
 for model in models.data:  # 수정: 'data' 속성 사용
-    print(model.id)  # 수정: 객체 속성으로 접근
+    # Available model: model.id
+    pass

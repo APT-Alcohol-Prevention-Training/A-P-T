@@ -4,26 +4,32 @@ Input validation utilities for the backend
 import html
 import re
 from typing import Dict, Any, Optional
+from config import current_config
 
 
 class InputValidator:
     """Validates and sanitizes user input"""
     
     @staticmethod
-    def sanitize_string(text: str, max_length: int = 1000) -> str:
+    def sanitize_string(text: str, max_length: Optional[int] = None) -> str:
         """
         Sanitize a string by removing potentially harmful characters
         and limiting length.
         
         Args:
             text: Input string to sanitize
-            max_length: Maximum allowed length (default: 1000)
+            max_length: Maximum allowed length (uses config default if not specified)
             
         Returns:
             Sanitized string safe for storage and display
         """
         if not isinstance(text, str):
             return ""
+        
+        # Use config's max message length if not specified
+        if max_length is None:
+            config = current_config()
+            max_length = config.MAX_MESSAGE_LENGTH
         
         # First, decode any HTML entities to prevent double encoding
         text = html.unescape(text)
@@ -71,7 +77,9 @@ class InputValidator:
     @staticmethod
     def validate_chatbot_type(chatbot_type: str) -> bool:
         """Validate chatbot type is one of allowed values"""
-        return chatbot_type in ["ai", "student", "doctor"]
+        # Could be extended in config if needed
+        allowed_types = ["ai", "student", "doctor"]
+        return chatbot_type in allowed_types
     
     @staticmethod
     def validate_risk_score(risk_score: Any) -> Optional[int]:

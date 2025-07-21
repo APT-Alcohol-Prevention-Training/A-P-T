@@ -1,3 +1,4 @@
 import secrets
 
-print(secrets.token_hex(32))
+# Generate a secret token
+# secret_token = secrets.token_hex(32)

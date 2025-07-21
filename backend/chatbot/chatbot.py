@@ -1,5 +1,5 @@
-import os
 from openai import OpenAI
+from config import current_config
 
 
 class Chatbot:
@@ -20,15 +20,23 @@ class Chatbot:
                 return cls._handle_date_scenario_response(user_message)
     
 
-        # Get API configuration from environment variables
-        api_key = os.getenv("OPENAI_API_KEY")
-        model = os.getenv("OPENAI_DEFAULT_MODEL", "gpt-3.5-turbo")
+        # Get configuration
+        config = current_config()
+        openai_config = config.get_openai_config()
+        
+        # Use provided API key or get from config
+        if not api_key:
+            api_key = openai_config['api_key']
         
         if not api_key:
-            raise ValueError("Missing OPENAI_API_KEY environment variable")
+            raise ValueError("Missing OpenAI API key")
 
         # Initialize the OpenAI client
-        client = OpenAI(api_key=api_key)
+        client = OpenAI(
+            api_key=api_key,
+            timeout=openai_config['timeout'],
+            max_retries=openai_config['max_retries']
+        )
 
         # Map chatbot types to style instructions.
         style_instructions = {
@@ -47,16 +55,24 @@ class Chatbot:
 
         try:
             response = client.chat.completions.create(
-                model=model,
+                model=openai_config['model'],
                 messages=messages,
-                temperature=0.7,
+                temperature=openai_config['temperature'],
+                max_tokens=openai_config['max_tokens'],
+                top_p=openai_config['top_p'],
+                frequency_penalty=openai_config['frequency_penalty'],
+                presence_penalty=openai_config['presence_penalty']
             )
             content = response.choices[0].message.content
             if content is None:
                 raise RuntimeError("No content was returned from the API.")
             return content.strip()
-        except Exception:
-            raise RuntimeError("I'm sorry, I encountered an error. Please try again later.")
+        except Exception as e:
+            config = current_config()
+            if config.DEBUG:
+                raise RuntimeError(f"OpenAI API error: {str(e)}")
+            else:
+                raise RuntimeError("I'm sorry, I encountered an error. Please try again later.")
     
     @classmethod
     def _handle_party_scenario_response(cls, user_message):

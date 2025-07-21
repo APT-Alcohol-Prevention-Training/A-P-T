@@ -1,3 +1,10 @@
+# 환경 설정 파일 (중요! API 키 포함)
+.env
+backend/.env
+frontend/.env
+frontend/.env.local
+*.env
+
 # Python 가상환경 관련 (프로젝트 구조에 따라 경로 수정)
 venv/
 backend/venv/
@@ -10,9 +17,33 @@ __pycache__/
 # 로그 파일들
 *.log
 frontend/frontend.log
+backend/logs/
+backend/logger/logs/
 
 # 기타 빌드/패키징 결과물
 dist/
 build/
 
-backend/logger/logs/*.log
+# 테스트 관련
+frontend/coverage/
+frontend/frontend_test_report.json
+*.coverage
+.pytest_cache/
+
+# Node.js
+node_modules/
+.next/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

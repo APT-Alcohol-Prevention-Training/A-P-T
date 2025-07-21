@@ -16,12 +16,12 @@ try:
     with open("training_data.jsonl", "rb") as file:
         response = client.files.create(file=file, purpose="fine-tune")
         training_file_id = response.id
-        print(f"Training file uploaded successfully. File ID: {training_file_id}")
+        # Training file uploaded successfully. File ID: {training_file_id}
 except FileNotFoundError:
-    print("The file 'training_data.jsonl' was not found.")
+    # The file 'training_data.jsonl' was not found.
     exit(1)
 except Exception as e:
-    print(f"An error occurred while uploading the file: {e}")
+    # An error occurred while uploading the file: {e}
     exit(1)
 
 # Fine-tune the model and return the fine-tuning job ID
@@ -32,11 +32,11 @@ try:
         model=model_name
     )
     fine_tune_job_id = fine_tune_response.id
-    print(f"Fine-tuning job initiated successfully. Job ID: {fine_tune_job_id}")
+    # Fine-tuning job initiated successfully. Job ID: {fine_tune_job_id}
     
     # Return the fine-tuning job ID for future use
-    print(f"Use this Fine-tuning Job ID: {fine_tune_job_id}")
+    # Use this Fine-tuning Job ID: {fine_tune_job_id}
     
 except Exception as e:
-    print(f"An error occurred while initiating fine-tuning: {e}")
+    # An error occurred while initiating fine-tuning: {e}
     exit(1)
